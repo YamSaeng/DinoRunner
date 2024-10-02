@@ -1,3 +1,7 @@
+const WINDOW_LEFT = 0;
+const WINDOW_RIGHT = 900;
+const PLAYER_SPEED = 0.2;
+
 class Player {
     WALK_ANIMATION_TIMER = 200;
     walkAnimationTimer = this.WALK_ANIMATION_TIMER;
@@ -12,7 +16,7 @@ class Player {
     GRAVITY = 0.4;
 
     // 생성자
-    constructor(ctx, width, height, minJumpHeight, maxJumpHeight, scaleRatio) {
+    constructor(ctx, width, height, minJumpHeight, maxJumpHeight, scaleRatio) {        
         this.ctx = ctx;
         this.canvas = ctx.canvas;
         this.width = width;
@@ -23,6 +27,8 @@ class Player {
 
         this.x = 10 * scaleRatio;
         this.y = this.canvas.height - this.height - 1.5 * scaleRatio;
+        this.speed = 0;
+
         // 기본 위치 상수화
         this.yStandingPosition = this.y;
 
@@ -53,22 +59,51 @@ class Player {
         if (event.code === "Space") {
             this.jumpPressed = true;
         }
+
+        if (event.code === "ArrowLeft") {            
+            this.speed = -PLAYER_SPEED;            
+        }
+        
+        if (event.code === "ArrowRight") {            
+            this.speed = PLAYER_SPEED;           
+        }
     };
 
     keyup = (event) => {
         if (event.code === "Space") {
             this.jumpPressed = false;
         }
+
+        if (event.code === "ArrowLeft" || event.code === "ArrowRight") {
+            this.speed = 0;
+        }
     };
 
-    update(gameSpeed, deltaTime) {
-        this.run(gameSpeed, deltaTime);
+    update(gameSpeed, deltaTime) {        
+        this.move(gameSpeed, deltaTime);
+        this.animation(gameSpeed, deltaTime);
 
         if (this.jumpInProgress) {
             this.image = this.standingStillImage;
         }
 
         this.jump(deltaTime);
+    }
+
+    move(gameSpeed, deltaTime) {
+        if(this.x < WINDOW_LEFT)
+        {
+            this.x = WINDOW_LEFT;
+            return;
+        }
+
+        if(this.x > WINDOW_RIGHT)
+        {
+            this.x = WINDOW_RIGHT;
+            return;
+        }        
+
+        this.x += gameSpeed * deltaTime * this.speed;        
     }
 
     jump(deltaTime) {
@@ -102,7 +137,7 @@ class Player {
         }
     }
 
-    run(gameSpeed, deltaTime) {
+    animation(gameSpeed, deltaTime) {
         if (this.walkAnimationTimer <= 0) {
             if (this.image === this.dinoRunImages[0]) {
                 this.image = this.dinoRunImages[1];
