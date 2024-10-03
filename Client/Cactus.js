@@ -1,5 +1,6 @@
 class Cactus {
-  constructor(ctx, x, y, width, height, image) {
+  constructor(id, ctx, x, y, width, height, image) {
+    this.id = id;
     this.ctx = ctx;
     this.x = x;
     this.y = y;
