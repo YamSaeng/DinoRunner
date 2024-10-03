@@ -30,3 +30,5 @@ export const OBJECT_TYPE_PLAYER = 101;
 export const OBJECT_TYPE_FIRE = 102;
 export const OBJECT_TYPE_POKET_BALL = 103;
 export const OBJECT_TYPE_CACTUS = 104;
+
+export const JOB_TYPE_CREATE_OBJECT_FIRE = 1001;
