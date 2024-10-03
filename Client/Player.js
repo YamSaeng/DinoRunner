@@ -1,6 +1,8 @@
-const WINDOW_LEFT = 0;
-const WINDOW_RIGHT = 900;
-const PLAYER_SPEED = 0.2;
+import { PLAYER_SPEED, PLAYER_JUMP_SPEED,
+     GRAVITY, WINDOW_LEFT, WINDOW_RIGHT,
+     JOB_TYPE_CREATE_OBJECT_FIRE, OBJECT_TYPE_FIRE} from "./Constant.js";
+import Game from "./Game.js"
+import Job from "./Job.js"
 
 class Player {
     WALK_ANIMATION_TIMER = 200;
@@ -12,11 +14,11 @@ class Player {
     jumpInProgress = false;
     falling = false;
 
-    JUMP_SPEED = 0.6;
-    GRAVITY = 0.4;
+    JUMP_SPEED = PLAYER_JUMP_SPEED;
+    GRAVITY = GRAVITY;
 
     // 생성자
-    constructor(ctx, width, height, minJumpHeight, maxJumpHeight, scaleRatio) {        
+    constructor(ctx, width, height, minJumpHeight, maxJumpHeight, scaleRatio) {
         this.ctx = ctx;
         this.canvas = ctx.canvas;
         this.width = width;
@@ -60,13 +62,22 @@ class Player {
             this.jumpPressed = true;
         }
 
-        if (event.code === "ArrowLeft") {            
-            this.speed = -PLAYER_SPEED;            
+        if (event.code === "ArrowLeft") {
+            this.speed = -PLAYER_SPEED;
         }
-        
-        if (event.code === "ArrowRight") {            
-            this.speed = PLAYER_SPEED;           
+
+        if (event.code === "ArrowRight") {
+            this.speed = PLAYER_SPEED;
         }
+
+        if(event.code === "KeyA")
+        {
+            let game = Game.GetInstance();            
+            if(game != null)
+            {
+                game.jobQue.push(new Job(JOB_TYPE_CREATE_OBJECT_FIRE, OBJECT_TYPE_FIRE));
+            }    
+        }        
     };
 
     keyup = (event) => {
@@ -91,19 +102,17 @@ class Player {
     }
 
     move(gameSpeed, deltaTime) {
-        if(this.x < WINDOW_LEFT)
-        {
+        if (this.x < WINDOW_LEFT) {
             this.x = WINDOW_LEFT;
             return;
         }
 
-        if(this.x > WINDOW_RIGHT)
-        {
+        if (this.x > WINDOW_RIGHT) {
             this.x = WINDOW_RIGHT;
             return;
-        }        
+        }
 
-        this.x += gameSpeed * deltaTime * this.speed;        
+        this.x += gameSpeed * deltaTime * this.speed;
     }
 
     jump(deltaTime) {
@@ -150,7 +159,7 @@ class Player {
         this.walkAnimationTimer -= deltaTime * gameSpeed;
     }
 
-    draw() {
+    draw() {        
         this.ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
     }
 }
