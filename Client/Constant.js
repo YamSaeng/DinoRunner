@@ -26,6 +26,11 @@ export const GROUND_WIDTH = 2400;
 export const GROUND_HEIGHT = 24;
 export const GROUND_SPEED = 0.2;
 
+// 불꽃
+export const FIRE_SPEED = 0.7;
+export const FIRE_ANIMATION_TIME = 10;
+export const FIRE_ANIMATION_START_SPRITE_INDEX = 2;
+
 export const OBJECT_TYPE_PLAYER = 101;
 export const OBJECT_TYPE_FIRE = 102;
 export const OBJECT_TYPE_POKET_BALL = 103;
