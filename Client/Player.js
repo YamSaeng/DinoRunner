@@ -1,8 +1,10 @@
-import { PLAYER_SPEED, PLAYER_JUMP_SPEED,
+import {
+    PLAYER_SPEED, PLAYER_JUMP_SPEED, FIRE_COUNT, FIRE_ATTACK_TIMER,
     PLAYER_WIDTH, PLAYER_HEIGHT,
     MIN_JUMP_HEIGHT, MAX_JUMP_HEIGHT,
-     GRAVITY, WINDOW_LEFT, WINDOW_RIGHT,
-     JOB_TYPE_CREATE_OBJECT_FIRE, OBJECT_TYPE_FIRE} from "./Constant.js";
+    GRAVITY, WINDOW_LEFT, WINDOW_RIGHT,
+    JOB_TYPE_CREATE_OBJECT_FIRE, OBJECT_TYPE_FIRE
+} from "./Constant.js";
 import Game from "./Game.js"
 import Job from "./Job.js"
 
@@ -11,7 +13,7 @@ class Player {
     walkAnimationTimer = this.WALK_ANIMATION_TIMER;
     dinoRunImages = [];
 
-    //점프 상태값
+    // 점프 상태값
     jumpPressed = false;
     jumpInProgress = false;
     falling = false;
@@ -22,16 +24,19 @@ class Player {
     // 생성자
     constructor(ctx, scaleRatio) {
         this.ctx = ctx;
-        this.canvas = ctx.canvas;                
+        this.canvas = ctx.canvas;
         this.scaleRatio = scaleRatio;
         this.minJumpHeight = MIN_JUMP_HEIGHT * this.scaleRatio;
         this.maxJumpHeight = MAX_JUMP_HEIGHT * this.scaleRatio;
         this.width = PLAYER_WIDTH * this.scaleRatio;
-        this.height = PLAYER_HEIGHT * this.scaleRatio;        
+        this.height = PLAYER_HEIGHT * this.scaleRatio;
 
         this.x = 10 * this.scaleRatio;
         this.y = this.canvas.height - this.height - 1.5 * this.scaleRatio;
         this.speed = 0;
+
+        this.fireAttackTimer = 0;
+        this.fireCount = FIRE_COUNT;
 
         // 기본 위치 상수화
         this.yStandingPosition = this.y;
@@ -72,15 +77,22 @@ class Player {
             this.speed = PLAYER_SPEED;
         }
 
-        if(event.code === "KeyA")
-        {
-            let game = Game.GetInstance();            
-            if(game != null)
-            {
-                game.jobQue.push(new Job(JOB_TYPE_CREATE_OBJECT_FIRE, 
-                    OBJECT_TYPE_FIRE, this.x, this.y));
-            }    
-        }        
+        if (event.code === "KeyA") {
+            if (this.fireAttackTimer <= 0 && this.fireCount > 0) {
+                let game = Game.GetInstance();
+                if (game != null) {
+                    this.fireCount--;
+                    game.jobQue.push(new Job(JOB_TYPE_CREATE_OBJECT_FIRE,
+                        OBJECT_TYPE_FIRE, this.x, this.y));
+
+                    this.fireAttackTimer = FIRE_ATTACK_TIMER;
+                }
+            }
+        }
+
+        if (event.code === "KeyR") {
+            this.fireCount = FIRE_COUNT;
+        }
     };
 
     keyup = (event) => {
@@ -93,7 +105,7 @@ class Player {
         }
     };
 
-    update(gameSpeed, deltaTime) {        
+    update(gameSpeed, deltaTime) {
         this.move(gameSpeed, deltaTime);
         this.animation(gameSpeed, deltaTime);
 
@@ -102,6 +114,8 @@ class Player {
         }
 
         this.jump(deltaTime);
+
+        this.fireAttackTimer -= deltaTime;
     }
 
     move(gameSpeed, deltaTime) {
@@ -163,7 +177,15 @@ class Player {
         this.walkAnimationTimer -= deltaTime * gameSpeed;
     }
 
-    draw() {        
+    draw() {
+        const fireCountTextX = 10 * this.scaleRatio;
+        const fireCountTextY = 25 * this.scaleRatio;
+
+        const fontSize = 20 * this.scaleRatio;
+        this.ctx.font = `${fontSize}px serif`;
+        this.ctx.fillStyle = '#525250';
+
+        this.ctx.fillText(`불꽃 남은 개수 ${this.fireCount}  [R] : 재장전`, fireCountTextX, fireCountTextY);
         this.ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
     }
 }
