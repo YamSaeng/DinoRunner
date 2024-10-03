@@ -77,7 +77,8 @@ class Player {
             let game = Game.GetInstance();            
             if(game != null)
             {
-                game.jobQue.push(new Job(JOB_TYPE_CREATE_OBJECT_FIRE, OBJECT_TYPE_FIRE));
+                game.jobQue.push(new Job(JOB_TYPE_CREATE_OBJECT_FIRE, 
+                    OBJECT_TYPE_FIRE, this.x, this.y));
             }    
         }        
     };
@@ -155,6 +156,7 @@ class Player {
             } else {
                 this.image = this.dinoRunImages[0];
             }
+
             this.walkAnimationTimer = this.WALK_ANIMATION_TIMER;
         }
 
