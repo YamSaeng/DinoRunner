@@ -1,12 +1,13 @@
-class Ground {
+import { GROUND_WIDTH, GROUND_HEIGHT, GROUND_SPEED } from "./Constant.js";
 
-    constructor(ctx, width, height, speed, scaleRatio) {
+class Ground {
+    constructor(ctx, scaleRatio) {
         this.ctx = ctx;
         this.canvas = ctx.canvas;
-        this.width = width;
-        this.height = height;
-        this.speed = speed;
         this.scaleRatio = scaleRatio;
+        this.width = GROUND_WIDTH * this.scaleRatio;
+        this.height = GROUND_HEIGHT * this.scaleRatio;
+        this.speed = GROUND_SPEED;        
 
         this.x = 0;
         this.y = this.canvas.height - this.height;
