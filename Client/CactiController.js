@@ -6,10 +6,11 @@ class CactiController {
     CACTUS_INTERVAL_MAX = 2000;
 
     nextCactusInterval = null;
-    cacti = [];
+    cactis = [];
 
 
     constructor(ctx, cactiImages, scaleRatio, speed) {
+        this.cactusID = 1;
         this.ctx = ctx;
         this.canvas = ctx.canvas;
         this.cactiImages = cactiImages;
@@ -37,15 +38,17 @@ class CactiController {
         const y = this.canvas.height - cactusImage.height;
 
         const cactus = new Cactus(
+            this.cactusID,
             this.ctx,
             x,
             y,
             cactusImage.width,
             cactusImage.height,
             cactusImage.image
-        );
+        );       
 
-        this.cacti.push(cactus);
+        this.cactis.push(cactus);
+        this.cactusID++;
     }
 
 
@@ -58,24 +61,24 @@ class CactiController {
 
         this.nextCactusInterval -= deltaTime;
 
-        this.cacti.forEach((cactus) => {
+        this.cactis.forEach((cactus) => {
             cactus.update(this.speed, gameSpeed, deltaTime, this.scaleRatio);
         })
 
         // 지나간 선인장 삭제
-        this.cacti = this.cacti.filter(cactus => cactus.x > -cactus.width);
+        this.cactis = this.cactis.filter(cactus => cactus.x > -cactus.width);
     }
 
     draw() {
-        this.cacti.forEach((cactus) => cactus.draw());
+        this.cactis.forEach((cactus) => cactus.draw());
     }
 
     collideWith(sprite) {
-        return this.cacti.some(cactus => cactus.collideWith(sprite));
+        return this.cactis.some(cactus => cactus.collideWith(sprite));
     }
 
     reset() {
-        this.cacti = [];
+        this.cactis = [];
     }
 }
 
