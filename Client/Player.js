@@ -1,4 +1,6 @@
 import { PLAYER_SPEED, PLAYER_JUMP_SPEED,
+    PLAYER_WIDTH, PLAYER_HEIGHT,
+    MIN_JUMP_HEIGHT, MAX_JUMP_HEIGHT,
      GRAVITY, WINDOW_LEFT, WINDOW_RIGHT,
      JOB_TYPE_CREATE_OBJECT_FIRE, OBJECT_TYPE_FIRE} from "./Constant.js";
 import Game from "./Game.js"
@@ -18,17 +20,17 @@ class Player {
     GRAVITY = GRAVITY;
 
     // 생성자
-    constructor(ctx, width, height, minJumpHeight, maxJumpHeight, scaleRatio) {
+    constructor(ctx, scaleRatio) {
         this.ctx = ctx;
-        this.canvas = ctx.canvas;
-        this.width = width;
-        this.height = height;
-        this.minJumpHeight = minJumpHeight;
-        this.maxJumpHeight = maxJumpHeight;
+        this.canvas = ctx.canvas;                
         this.scaleRatio = scaleRatio;
+        this.minJumpHeight = MIN_JUMP_HEIGHT * this.scaleRatio;
+        this.maxJumpHeight = MAX_JUMP_HEIGHT * this.scaleRatio;
+        this.width = PLAYER_WIDTH * this.scaleRatio;
+        this.height = PLAYER_HEIGHT * this.scaleRatio;        
 
-        this.x = 10 * scaleRatio;
-        this.y = this.canvas.height - this.height - 1.5 * scaleRatio;
+        this.x = 10 * this.scaleRatio;
+        this.y = this.canvas.height - this.height - 1.5 * this.scaleRatio;
         this.speed = 0;
 
         // 기본 위치 상수화
