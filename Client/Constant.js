@@ -25,3 +25,8 @@ export const MIN_JUMP_HEIGHT = 150;
 export const GROUND_WIDTH = 2400;
 export const GROUND_HEIGHT = 24;
 export const GROUND_SPEED = 0.2;
+
+export const OBJECT_TYPE_PLAYER = 101;
+export const OBJECT_TYPE_FIRE = 102;
+export const OBJECT_TYPE_POKET_BALL = 103;
+export const OBJECT_TYPE_CACTUS = 104;
