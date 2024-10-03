@@ -30,7 +30,8 @@ export const GROUND_SPEED = 0.2;
 export const FIRE_SPEED = 0.7;
 export const FIRE_ANIMATION_TIME = 10;
 export const FIRE_ANIMATION_START_SPRITE_INDEX = 2;
-export const FIRE_COUNT = 2;
+export const FIRE_COUNT = 5;
+export const FIRE_ATTACK_TIMER = 200;
 
 export const OBJECT_TYPE_PLAYER = 101;
 export const OBJECT_TYPE_FIRE = 102;
