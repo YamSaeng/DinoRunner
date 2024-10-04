@@ -215,6 +215,10 @@ class Game {
         });
     }
 
+    OtherUserDisconnect(data){        
+        this.rankings = this.rankings.filter(ranking => ranking.userID !== data);        
+    }
+
     DrawRankingScore() {
         const y = 25 * this.scaleRatio;
         const fontSize = 20 * this.scaleRatio;
