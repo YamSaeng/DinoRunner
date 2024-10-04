@@ -35,7 +35,7 @@ class CactiController {
         const index = this.getRandomNumber(0, this.cactiImages.length - 1);
         const cactusImage = this.cactiImages[index];
         const x = this.canvas.width * 1.5;
-        const y = this.canvas.height - cactusImage.height;
+        const y = this.canvas.height - cactusImage.height;        
 
         const cactus = new Cactus(
             this.cactusID,
@@ -45,7 +45,7 @@ class CactiController {
             cactusImage.width,
             cactusImage.height,
             cactusImage.image
-        );       
+        );                     
 
         this.cactis.push(cactus);
         this.cactusID++;
@@ -74,7 +74,17 @@ class CactiController {
     }
 
     collideWith(sprite) {
-        return this.cactis.some(cactus => cactus.collideWith(sprite));
+        let isCollider = false;
+
+        this.cactis.forEach(cactus => {
+            if(cactus.collideWith(sprite))
+            {                
+                this.cactis = this.cactis.filter(collideCactus => cactus.id !== collideCactus.id);                
+                isCollider = true;
+            }
+        });        
+
+        return isCollider;
     }
 
     reset() {
