@@ -1,4 +1,4 @@
-import { FIRE_SPEED, FIRE_ANIMATION_TIME, FIRE_ANIMATION_START_SPRITE_INDEX } from "./Constant.js"
+import { FIRE_SPEED, FIRE_ANIMATION_TIME, FIRE_ANIMATION_START_SPRITE_INDEX, OBJECT_TYPE_FIRE } from "./Constant.js"
 
 class Fire {
     sprites = [];
@@ -8,6 +8,8 @@ class Fire {
         this.scaleRatio = scaleRatio;
         this.width = 100 * this.scaleRatio;
         this.height = 50 * this.scaleRatio;
+
+        this.objectType = OBJECT_TYPE_FIRE;
         this.x = 0;
         this.y = 0;
         this.speed = FIRE_SPEED;

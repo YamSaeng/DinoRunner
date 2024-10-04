@@ -1,6 +1,7 @@
 import {
     PLAYER_SPEED, PLAYER_JUMP_SPEED, FIRE_COUNT, FIRE_ATTACK_TIMER,
     PLAYER_WIDTH, PLAYER_HEIGHT,
+    OBJECT_TYPE_PLAYER,
     MIN_JUMP_HEIGHT, MAX_JUMP_HEIGHT,
     GRAVITY, WINDOW_LEFT, WINDOW_RIGHT,
     JOB_TYPE_CREATE_OBJECT_FIRE, OBJECT_TYPE_FIRE
@@ -31,6 +32,7 @@ class Player {
         this.width = PLAYER_WIDTH * this.scaleRatio;
         this.height = PLAYER_HEIGHT * this.scaleRatio;
 
+        this.objectType = OBJECT_TYPE_PLAYER;
         this.x = 10 * this.scaleRatio;
         this.y = this.canvas.height - this.height - 1.5 * this.scaleRatio;
         this.speed = 0;

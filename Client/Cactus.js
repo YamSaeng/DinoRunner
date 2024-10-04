@@ -1,7 +1,11 @@
+import { OBJECT_TYPE_CACTUS } from "./Constant.js";
+
 class Cactus {
   constructor(id, ctx, x, y, width, height, image) {
     this.id = id;
     this.ctx = ctx;
+
+    this.objectType = OBJECT_TYPE_CACTUS;
     this.x = x;
     this.y = y;
     this.width = width;
