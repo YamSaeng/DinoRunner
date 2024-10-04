@@ -1,4 +1,5 @@
-export const CLIENT_VERSION = ["1.0.0", "1.0.1", "1.1.0"];
+export const PORT = 3020;
+export const CLIENT_VERSION = "1.0.0";
 export const WINDOW_LEFT = 0;
 export const WINDOW_RIGHT = 900;
 
@@ -39,3 +40,8 @@ export const OBJECT_TYPE_POKET_BALL = 103;
 export const OBJECT_TYPE_CACTUS = 104;
 
 export const JOB_TYPE_CREATE_OBJECT_FIRE = 1001;
+
+export const C2S_PACKET_TYPE_GAME_START = 11;
+export const C2S_PACKET_TYPE_GAME_END = 12;
+
+export const C2S_PACKET_TYPE_MOVE_STAGE = 101;
