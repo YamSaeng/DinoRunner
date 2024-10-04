@@ -25,6 +25,10 @@ class Session {
         this.socket.on("connection", (data) => {
             this.userId = data.useruuid;
         });
+
+        this.socket.on("response", (data) => {
+            console.log(data);
+        });
     }
 
     SendEvent(packetType, payload) {
