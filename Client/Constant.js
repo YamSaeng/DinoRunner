@@ -45,3 +45,4 @@ export const C2S_PACKET_TYPE_GAME_START = 11;
 export const C2S_PACKET_TYPE_GAME_END = 12;
 
 export const C2S_PACKET_TYPE_MOVE_STAGE = 101;
+export const C2S_PACKET_TYPE_SCORE_UPDATE = 102;
