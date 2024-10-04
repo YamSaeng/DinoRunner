@@ -1,4 +1,4 @@
-import { GameStart, GameEnd, MoveStage } from "./Game/Game.js";
+import { GameStart, GameEnd, MoveStage } from "./Packet/PacketProc.js";
 
 const packetTypeMappings = {
     11: GameStart,
