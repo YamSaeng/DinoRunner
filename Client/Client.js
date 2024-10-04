@@ -1,9 +1,9 @@
-import { GAME_SPEED_START, GAME_SPEED_INCREMENT } from "./Constant.js"
-import CactiController from './CactiController.js';
-import ItemController from './ItemController.js';
+import { GAME_SPEED_START, GAME_SPEED_INCREMENT, C2S_PACKET_TYPE_GAME_INIT, C2S_PACKET_TYPE_GAME_START } from "./Constant.js"
 import Game from "./Game.js";
+import Session from "./Network/Session.js";
 
 Game.GetInstance().GameStart();
+Session.GetInstance().Connect();
 
 // 게임 요소들
 let previousTime = null;
@@ -20,20 +20,20 @@ if (screen.orientation) {
 
 function showGameOver() {
   const fontSize = 70 * Game.GetInstance().scaleRatio;
-  Game.GetInstance().ctx.font = `${fontSize}px Verdana`;
-  Game.GetInstance().ctx.fillStyle = 'grey';
-  const x = Game.GetInstance().canvas.width / 4.5;
-  const y = Game.GetInstance().canvas.height / 2;
-  Game.GetInstance().ctx.fillText('GAME OVER', x, y);
+  Game.GetInstance().mainCtx.font = `${fontSize}px Verdana`;
+  Game.GetInstance().mainCtx.fillStyle = 'grey';
+  const x = Game.GetInstance().mainCanvas.width / 4.5;
+  const y = Game.GetInstance().mainCanvas.height / 2;
+  Game.GetInstance().mainCtx.fillText('GAME OVER', x, y);
 }
 
 function showStartGameText() {
   const fontSize = 40 * Game.GetInstance().scaleRatio;
-  Game.GetInstance().ctx.font = `${fontSize}px Verdana`;
-  Game.GetInstance().ctx.fillStyle = 'grey';
-  const x = Game.GetInstance().canvas.width / 14;
-  const y = Game.GetInstance().canvas.height / 2;
-  Game.GetInstance().ctx.fillText('Tap Screen or Press Space To Start', x, y);
+  Game.GetInstance().mainCtx.font = `${fontSize}px Verdana`;
+  Game.GetInstance().mainCtx.fillStyle = 'grey';
+  const x = Game.GetInstance().mainCanvas.width / 14;
+  const y = Game.GetInstance().mainCanvas.height / 2;  
+  Game.GetInstance().mainCtx.fillText('Tap Screen or Press Space To Start', x, y);
 }
 
 function updateGameSpeed(deltaTime) {
@@ -45,7 +45,10 @@ function reset() {
   gameover = false;
   waitingToStart = false;
 
-  Game.GetInstance().ObjectResest();
+  Game.GetInstance().ObjectResest();  
+
+  Session.GetInstance().SendEvent(C2S_PACKET_TYPE_GAME_INIT, { timestamp: Date.now() });
+  Session.GetInstance().SendEvent(C2S_PACKET_TYPE_GAME_START);
 
   gameSpeed = GAME_SPEED_START;
 }
@@ -61,8 +64,10 @@ function setupGameReset() {
 }
 
 function clearScreen() {
-  Game.GetInstance().ctx.fillStyle = 'white';
-  Game.GetInstance().ctx.fillRect(0, 0, Game.GetInstance().canvas.width, Game.GetInstance().canvas.height);
+  Game.GetInstance().mainCtx.fillStyle = 'white';
+  Game.GetInstance().mainCtx.fillRect(0, 0, Game.GetInstance().mainCanvas.width, Game.GetInstance().mainCanvas.height);
+  Game.GetInstance().scoreCtx.fillStyle = 'white';
+  Game.GetInstance().scoreCtx.fillRect(0, 0, Game.GetInstance().scoreCanvas.width, Game.GetInstance().scoreCanvas.height);
 }
 
 function gameLoop(currentTime) {
@@ -80,8 +85,11 @@ function gameLoop(currentTime) {
   clearScreen();  
 
   // 게임 안에 있는 오브젝트 업데이트
-  Game.GetInstance().UpdateObject(gameSpeed, deltaTime);
-  Game.GetInstance().DrawObject();
+  if(!waitingToStart)
+  {
+    Game.GetInstance().UpdateObject(gameSpeed, deltaTime);
+    Game.GetInstance().DrawObject();
+  }  
 
   // if (!gameover && !waitingToStart) {
   //   // update
