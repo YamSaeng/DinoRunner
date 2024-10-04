@@ -4,14 +4,20 @@ import { Server as SocketIO } from "socket.io";
 import { v4 as uuidV4 } from "uuid";
 
 import { loadGameAssets } from "./Contents/assets.js";
+import { PORT } from "./Constant.js";
+import { CLIENT_VERSION } from "../Server/Constant.js";
+import packetTypeMaapings from "./PacketType.js";
+import { Stage } from "./Contents/Stage.js";
+
+import User from "./User/User.js";
 
 export class GameServer {
-
     constructor() {
         this.express = express();
         this.server = createServer(this.express);
-        this.PORT = 3020;
+        this.PORT = PORT;
         this.users = [];
+        this.stage = new Stage();
     }
 
     ServerStart() {
@@ -29,15 +35,15 @@ export class GameServer {
         this.Listen();
 
         // Aceept 시작
-        this.Accept(socketIO);        
+        this.Accept(socketIO);
     }
 
     async AssetLoad() {
         try {
-            const assets = await loadGameAssets();            
+            const assets = await loadGameAssets();
             console.log("애셋 정보 읽기 완료");
         }
-        catch(e){
+        catch (e) {
             console.log("애셋 정보 읽어오기 실패 ", e);
         }
     }
@@ -53,22 +59,58 @@ export class GameServer {
     }
 
     Accept(socketIO) {
-        socketIO.on('connect', (socket) => {
+        // connection이라는 이벤트가 발생할 때까지 대기한다.
+        // 서버에 접속하는 모든 유저들을 대상으로 하는 이벤트를 탐지한다.
+        socketIO.on('connection', (socket) => {
+            // Recv Event 등록
+            socket.on("event", (data) => this.Recv(socketIO, socket, data));
+            // Disconnect Event 등록
+            socket.on("disconnect", (socket) => { this.Disconnect(socket, userUUID) });
+
             const userUUID = uuidV4();
-            this.AddUser({ uuid: userUUID, socketId: socket });
+            this.AddUser(new User(userUUID, socket));
         })
     }
 
-    AddUser(user) {
-        this.users.push(user);
-        console.log(`유저 접속 : ${user.uuid} 소켓 ID : ${user.socket.id}`);
+    Recv(io, socket, data) {
+        if (!CLIENT_VERSION.includes(data.clientVersion)) {
+            socket.emit("response", { status: "실패", message: "클라이언트 버전이 맞지 않습니다." });
+            return;
+        }
+
+        const packetType = packetTypeMaapings[data.packetType];
+        if (!packetType) {
+            socket.emit("response", { status: "실패", message: `${data.packetType} Packet Type을 찾을 수 없습니다.` });
+            return;
+        }
+
+        const response = packetType(data.userId, data.payload, this.stage);
+        socket.emit("response", response);
     }
 
-    RemoveUser(id) {
-        const index = this.users.findIndex((user) => user.id == id);
-        if (index !== -1) {
+    // socket으로 transfer close가 들어옴
+    // uuid로 유저 삭제
+    Disconnect(socket, uuid) {
+        console.log(`소켓 연결이 해제 되었습니다. ${uuid}`);    
+        
+        this.RemoveUser(uuid);                            
+    }
+
+    AddUser(newUser) {
+        this.users.push(newUser);
+
+        console.log(`유저 접속 : ${newUser.userUUID} 소켓 ID : ${newUser.socket.id}`);
+
+        this.stage.CreateStage(newUser.userUUID);
+
+        newUser.socket.emit("connection", { useruuid: newUser.userUUID });
+    }
+
+    RemoveUser(id) {                
+        const index = this.users.findIndex((user) => user.userUUID == id);
+        if (index !== -1) {            
             return this.users.splice(index, 1)[0];
-        }
+        }        
     }
 
     GetUser() {
