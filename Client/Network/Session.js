@@ -1,7 +1,10 @@
-import { CLIENT_VERSION, PORT, 
-    S2C_PACKET_TYPE_GAME_INIT, 
+import {
+    CLIENT_VERSION, PORT,
+    S2C_PACKET_TYPE_GAME_INIT,
     S2C_PACKET_TYPE_GAME_START,
-    S2C_PACKET_TYPE_RANK_SCORE_UPDATE } from "../Constant.js";
+    S2C_PACKET_TYPE_RANK_SCORE_UPDATE,
+    S2C_PACKET_TYPE_USER_DISCONNECT
+} from "../Constant.js";
 import Game from "../Game.js";
 
 class Session {
@@ -27,24 +30,26 @@ class Session {
         });
 
         this.socket.on("connection", (data) => {
-            this.userId = data.useruuid;                  
+            this.userId = data.useruuid;
 
             console.log("S2C_Connect userUUID : ", this.userId);
         });
 
         this.socket.on("response", (data) => {
-            
-            switch(data.packetType)
-            {
+
+            switch (data.packetType) {
                 case S2C_PACKET_TYPE_GAME_INIT:
                     Game.GetInstance().SetGameInit(data.data);
                     break;
-                case S2C_PACKET_TYPE_GAME_START:                    
+                case S2C_PACKET_TYPE_GAME_START:
                     Game.GetInstance().SetRankScores(data.data);
                     break;
-                case S2C_PACKET_TYPE_RANK_SCORE_UPDATE:                                             
-                    Game.GetInstance().SetRankScore(data.data);            
-                    break;                    
+                case S2C_PACKET_TYPE_RANK_SCORE_UPDATE:
+                    Game.GetInstance().SetRankScore(data.data);
+                    break;
+                case S2C_PACKET_TYPE_USER_DISCONNECT:       
+                    Game.GetInstance().OtherUserDisconnect(data.data);             
+                    break;
             }
 
             //console.log(data);
@@ -58,7 +63,7 @@ class Session {
             packetType,
             payload,
         });
-    }    
+    }
 }
 
 export default Session;
