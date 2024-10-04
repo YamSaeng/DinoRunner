@@ -1,26 +1,31 @@
 import {
-    GAME_WIDTH, GAME_HEIGHT,
-    GROUND_SPEED,
-    OBJECT_TYPE_CACTUS, OBJECT_TYPE_FIRE, OBJECT_TYPE_PLAYER, OBJECT_TYPE_POKET_BALL,
-    JOB_TYPE_CREATE_OBJECT_FIRE
+    MAIN_GAME_CANVAS_WIDTH, MAIN_GAME_CANVAS_HEIGHT,
+    RANK_SCORE_CANVAS_WIDTH, RANK_SCORE_CANVAS_HEIGHT,
+    GROUND_SPEED, CACTUS_MINUS_SCORE,
+    OBJECT_TYPE_FIRE, OBJECT_TYPE_PLAYER, OBJECT_TYPE_POKET_BALL,
+    JOB_TYPE_CREATE_OBJECT_FIRE    
 } from "./Constant.js";
 
 import Player from "./Player.js";
 import Fire from "./Fire.js";
 import Item from "./Item.js";
-import Cactus from "./Cactus.js";
 
 import ItemController from "./ItemController.js";
 import CactiController from "./CactiController.js";
 
 import Ground from "./Ground.js";
 import Score from "./Score.js";
+import Session from "./Network/Session.js";
 
 class Game {
     constructor() {
         this.jobQue = [];
-        this.canvas = document.getElementById("game");
-        this.ctx = this.canvas.getContext("2d");
+        this.rankings = [];
+        this.mainCanvas = document.getElementById("game");
+        this.mainCtx = this.mainCanvas.getContext("2d");
+        this.scoreCanvas = document.getElementById("score");
+        this.scoreCtx = this.scoreCanvas.getContext("2d");
+        this.userID = 0;
 
         // 관리중인 오브젝트 목록
         this.objects = [];
@@ -57,10 +62,10 @@ class Game {
         const screenWidth = Math.min(window.innerHeight, document.documentElement.clientWidth);
 
         // window is wider than the game width
-        if (screenWidth / screenHeight < GAME_WIDTH / GAME_HEIGHT) {
-            this.scaleRatio = screenWidth / GAME_WIDTH;
+        if (screenWidth / screenHeight < MAIN_GAME_CANVAS_WIDTH / MAIN_GAME_CANVAS_HEIGHT) {
+            this.scaleRatio = screenWidth / MAIN_GAME_CANVAS_WIDTH;
         } else {
-            this.scaleRatio = screenHeight / GAME_HEIGHT;
+            this.scaleRatio = screenHeight / MAIN_GAME_CANVAS_HEIGHT;
         }
 
         // 화면 설정
@@ -70,21 +75,21 @@ class Game {
         this.CreateSprites();
 
         // 아이템 관리자 생성
-        this.itemController = new ItemController(this.ctx, this.cactiImages, this.scaleRatio, GROUND_SPEED);
+        this.itemController = new ItemController(this.mainCtx, this.cactiImages, this.scaleRatio, GROUND_SPEED);
         // 선인장 관리자 생성
-        this.cactiController = new CactiController(this.ctx, this.cactiImages, this.scaleRatio, GROUND_SPEED);
+        this.cactiController = new CactiController(this.mainCtx, this.cactiImages, this.scaleRatio, GROUND_SPEED);
 
         // 점수판
-        this.score = new Score(this.ctx, this.scaleRatio);
+        this.score = new Score(this.mainCtx, this.scaleRatio);
 
         // ground 생성
-        this.ground = new Ground(this.ctx, this.scaleRatio);
+        this.ground = new Ground(this.mainCtx, this.scaleRatio);
 
         // 플레이어 생성
-        this.player = new Player(this.ctx, this.scaleRatio);
+        this.player = new Player(this.mainCtx, this.scaleRatio);
 
         // 점수
-        this.score = new Score(this.ctx, this.scaleRatio);
+        this.score = new Score(this.mainCtx, this.scaleRatio);
 
         this.objects.push(this.ground);
         this.objects.push(this.player);
@@ -93,8 +98,11 @@ class Game {
 
     SetScreen() {
         // 화면 설정
-        this.canvas.width = GAME_WIDTH * this.scaleRatio;
-        this.canvas.height = GAME_HEIGHT * this.scaleRatio;
+        this.mainCanvas.width = MAIN_GAME_CANVAS_WIDTH * this.scaleRatio;
+        this.mainCanvas.height = MAIN_GAME_CANVAS_HEIGHT * this.scaleRatio;
+
+        this.scoreCanvas.width = RANK_SCORE_CANVAS_WIDTH * this.scaleRatio;
+        this.scoreCanvas.height = RANK_SCORE_CANVAS_HEIGHT * this.scaleRatio;
     }
 
     CreateSprites() {
@@ -131,10 +139,10 @@ class Game {
 
         switch (objectType) {
             case OBJECT_TYPE_PLAYER:
-                object = new Player(this.ctx, this.scaleRatio);
+                object = new Player(this.mainCtx, this.scaleRatio);
                 break;
             case OBJECT_TYPE_FIRE:
-                object = new Fire(this.ctx, this.scaleRatio);
+                object = new Fire(this.mainCtx, this.scaleRatio);
                 break;
             default:
                 break;
@@ -166,11 +174,72 @@ class Game {
         if (this.objects.length > 0) {
             this.objects.forEach((object) => object.update(gameSpeed, deltaTime));
         }
+
+        this.cactiController.update(gameSpeed, deltaTime);
+
+        if (this.cactiController.collideWith(this.player)) {            
+            this.score.SetScoreMinus(CACTUS_MINUS_SCORE);            
+        }
+
+        this.score.update(deltaTime);
     }
 
     DrawObject() {
         if (this.objects.length > 0) {
             this.objects.forEach((object) => object.draw());
+        }
+
+        this.cactiController.draw();
+
+        this.DrawRankingScore();
+    }
+
+    SetGameInit(data)
+    {
+        this.score.SetScoreInfo(data.goalScore, data.scoreMultiple);        
+    }    
+
+    SetRankScores(rankDatas) {
+        this.rankings = [];
+
+        for (let i = 0; i < rankDatas.length; i++) {
+            this.rankings.push({ userID: rankDatas[i][0].userUUID, score: rankDatas[i][0].score });
+        }
+    }
+
+    SetRankScore(rankData) {
+        this.rankings.forEach(rank => {
+            if (rank.userID == rankData.userUUID) {
+                rank.score = rankData.score;
+            }
+        });
+    }
+
+    DrawRankingScore() {
+        const y = 25 * this.scaleRatio;
+        const fontSize = 20 * this.scaleRatio;
+
+        this.scoreCtx.font = `${fontSize}px serif`;
+        this.scoreCtx.fillStyle = '#525250';
+
+        const scoreX = 10 * this.scaleRatio;
+
+        let scorePadded = "점수판 ";
+
+        this.scoreCtx.fillText(scorePadded, scoreX, y);
+
+        this.scoreCtx.fillText("----------------------------", scoreX, y + 20);
+
+        let rankYPosition = y + 40;
+        if (this.rankings.length > 0) {
+            this.rankings.forEach(rank => {
+                const userID = rank.userID;
+                const score = rank.score;
+
+                const rankText = `ID : ${userID} 점수 : ${score}`;
+                this.scoreCtx.fillText(rankText, scoreX, rankYPosition);
+                rankYPosition += 20;
+            });
         }
     }
 
