@@ -2,12 +2,11 @@
   "name": "stage",
   "version": "1.0.0",
   "data": [
-    { "id":  1000, "score": 0 },
-    { "id":  1001, "score": 100 },
-    { "id":  1002, "score": 200 },
-    { "id":  1003, "score": 300 },
-    { "id":  1004, "score": 400 },
-    { "id":  1005, "score": 500 },
-    { "id":  1006, "score": 600 }
+    { "id":  1000, "goalScore": 10, "scoreMultiple": 1 },
+    { "id":  1001, "goalScore": 200, "scoreMultiple": 1.1 },
+    { "id":  1002, "goalScore": 300, "scoreMultiple": 1.2 },
+    { "id":  1003, "goalScore": 400, "scoreMultiple": 1.3 },
+    { "id":  1004, "goalScore": 500, "scoreMultiple": 1.4 },
+    { "id":  1005, "goalScore": 600, "scoreMultiple": 1.5 }    
   ]
 }
