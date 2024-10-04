@@ -5,7 +5,7 @@ import { v4 as uuidV4 } from "uuid";
 
 import { loadGameAssets } from "./Contents/assets.js";
 import { PORT } from "./Constant.js";
-import { CLIENT_VERSION } from "../Server/Constant.js";
+import { CLIENT_VERSION, S2C_PACKET_TYPE_USER_DISCONNECT } from "../Server/Constant.js";
 import packetTypeMaapings from "./PacketType.js";
 import { Stage } from "./Contents/Stage.js";
 
@@ -104,6 +104,8 @@ export class GameServer {
     Disconnect(socket, uuid) {
         console.log(`소켓 연결이 해제 되었습니다. ${uuid}`);
 
+        const response = {packetType : S2C_PACKET_TYPE_USER_DISCONNECT, data: uuid};
+        this.BroadCastExceptMe(uuid, response);
         this.RemoveUser(uuid);
     }
 
