@@ -18,6 +18,7 @@ export class GameServer {
         this.PORT = PORT;
         this.users = [];
         this.stage = new Stage();
+        this.userID = 1;
     }
 
     ServerStart() {
@@ -67,7 +68,7 @@ export class GameServer {
             // Disconnect Event 등록
             socket.on("disconnect", (socket) => { this.Disconnect(socket, userUUID) });
 
-            const userUUID = uuidV4();
+            const userUUID = ++this.userID;//uuidV4();
             this.AddUser(new User(userUUID, socket));
         })
     }
@@ -84,16 +85,26 @@ export class GameServer {
             return;
         }
 
-        const response = packetType(data.userId, data.payload, this.stage);
-        socket.emit("response", response);
+        const response = packetType(data.userId, data.payload, this.stage, this.users);
+        if (response.isBroadCast == true) {
+            if (response.exceptMe == true) {
+                this.BroadCastExceptMe(data.userId, { packetType: response.packetType, data: response.data });
+            }
+            else {
+                this.BroadCast({ packetType: response.packetType, data: response.data });
+            }
+        }
+        else {
+            socket.emit("response", { packetType: response.packetType, data: response.data });
+        }
     }
 
     // socket으로 transfer close가 들어옴
     // uuid로 유저 삭제
     Disconnect(socket, uuid) {
-        console.log(`소켓 연결이 해제 되었습니다. ${uuid}`);    
-        
-        this.RemoveUser(uuid);                            
+        console.log(`소켓 연결이 해제 되었습니다. ${uuid}`);
+
+        this.RemoveUser(uuid);
     }
 
     AddUser(newUser) {
@@ -106,14 +117,28 @@ export class GameServer {
         newUser.socket.emit("connection", { useruuid: newUser.userUUID });
     }
 
-    RemoveUser(id) {                
+    RemoveUser(id) {
         const index = this.users.findIndex((user) => user.userUUID == id);
-        if (index !== -1) {            
+        if (index !== -1) {
             return this.users.splice(index, 1)[0];
-        }        
+        }
     }
 
     GetUser() {
         return this.users;
+    }
+
+    BroadCast(data) {
+        this.users.forEach(user => {
+            user.socket.emit("response", data);
+        });
+    }
+
+    BroadCastExceptMe(uuid, data) {
+        this.users.forEach(user => {
+            if (user.userUUID != uuid) {
+                user.socket.emit("response", data);
+            }
+        });
     }
 }
