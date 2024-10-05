@@ -28,7 +28,7 @@ class Score {
         Session.GetInstance().SendEvent(C2S_PACKET_TYPE_MOVE_STAGE, { currentStage: this.currentStage, nextStage: this.nextStage });
       }
 
-      if (this.serverScoreUpdateTime < 0) {        
+      if (this.serverScoreUpdateTime < 0) {
         this.serverScoreUpdateTime = C2S_SCORE_SEND_TIME;
 
         Session.GetInstance().SendEvent(C2S_PACKET_TYPE_SCORE_UPDATE, { score: Math.floor(this.score), currentStage: this.currentStage });
@@ -38,7 +38,7 @@ class Score {
     }
   }
 
-  SetScoreInfo(currentStage, nextStage, goalScore, scoreMultiple) {    
+  SetScoreInfo(currentStage, nextStage, goalScore, scoreMultiple) {
     this.currentStage = currentStage;
     this.nextStage = nextStage;
     this.goalScore = goalScore;
@@ -81,14 +81,14 @@ class Score {
     this.ctx.font = `${fontSize}px serif`;
     this.ctx.fillStyle = '#525250';
 
-    const scoreX = this.canvas.width - 75 * this.scaleRatio;
-    const highScoreX = scoreX - 125 * this.scaleRatio;
+    const scoreX = this.canvas.width - 155 * this.scaleRatio;
+    const highScoreX = scoreX - 200 * this.scaleRatio;
 
     const scorePadded = Math.floor(this.score).toString().padStart(6, 0);
     const highScorePadded = highScore.toString().padStart(6, 0);
 
-    this.ctx.fillText(`HI ${highScorePadded}`, highScoreX, y);
-    this.ctx.fillText(scorePadded, scoreX, y);
+    this.ctx.fillText(`최고 점수 : ${highScorePadded}`, highScoreX, y);
+    this.ctx.fillText(`점수 : ${scorePadded}`, scoreX, y);
   }
 }
 
