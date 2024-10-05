@@ -14,28 +14,33 @@ class Score {
     this.scoreMultiple = 0;
     this.goalScore = 0;
     this.start = false;
+
+    this.currentStage = 0;
+    this.nextStage = 0;
   }
 
-  update(deltaTime) {        
+  update(deltaTime) {
     if (this.start == true) {
       this.score += deltaTime * 0.001 * this.scoreMultiple;
 
-      if (Math.floor(this.score) === this.goalScore && this.stageChange) {        
+      if (Math.floor(this.score) === this.goalScore && this.stageChange) {
         this.stageChange = false;
-        Session.GetInstance().SendEvent(C2S_PACKET_TYPE_MOVE_STAGE, { currentStage: 1000, targetStage: 1001 });
+        Session.GetInstance().SendEvent(C2S_PACKET_TYPE_MOVE_STAGE, { currentStage: this.currentStage, nextStage: this.nextStage });
       }
 
-      if (this.serverScoreUpdateTime < 0) {
+      if (this.serverScoreUpdateTime < 0) {        
         this.serverScoreUpdateTime = C2S_SCORE_SEND_TIME;
 
         Session.GetInstance().SendEvent(C2S_PACKET_TYPE_SCORE_UPDATE, { score: Math.floor(this.score) });
       }
 
       this.serverScoreUpdateTime -= deltaTime;
-    }    
+    }
   }
 
-  SetScoreInfo(goalScore, scoreMultiple) {
+  SetScoreInfo(currentStage, nextStage, goalScore, scoreMultiple) {    
+    this.currentStage = currentStage;
+    this.nextStage = nextStage;
     this.goalScore = goalScore;
     this.scoreMultiple = scoreMultiple;
 
@@ -61,11 +66,9 @@ class Score {
     return this.score;
   }
 
-  SetScoreMinus(score)
-  {
+  SetScoreMinus(score) {
     this.score -= score;
-    if(this.score < 0)
-    {
+    if (this.score < 0) {
       this.score = 0;
     }
   }
