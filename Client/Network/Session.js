@@ -2,6 +2,7 @@ import {
     CLIENT_VERSION, PORT,
     S2C_PACKET_TYPE_GAME_INIT,
     S2C_PACKET_TYPE_GAME_START,
+    S2C_PACKET_TYPE_MOVE_STAGE,
     S2C_PACKET_TYPE_RANK_SCORE_UPDATE,
     S2C_PACKET_TYPE_USER_DISCONNECT
 } from "../Constant.js";
@@ -47,8 +48,11 @@ class Session {
                 case S2C_PACKET_TYPE_RANK_SCORE_UPDATE:
                     Game.GetInstance().SetRankScore(data.data);
                     break;
-                case S2C_PACKET_TYPE_USER_DISCONNECT:       
-                    Game.GetInstance().OtherUserDisconnect(data.data);             
+                case S2C_PACKET_TYPE_MOVE_STAGE:                    
+                    Game.GetInstance().SetStageUpdate(data.data);
+                    break;
+                case S2C_PACKET_TYPE_USER_DISCONNECT:
+                    Game.GetInstance().OtherUserDisconnect(data.data);
                     break;
             }
 
