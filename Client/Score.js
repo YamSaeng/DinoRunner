@@ -31,7 +31,7 @@ class Score {
       if (this.serverScoreUpdateTime < 0) {        
         this.serverScoreUpdateTime = C2S_SCORE_SEND_TIME;
 
-        Session.GetInstance().SendEvent(C2S_PACKET_TYPE_SCORE_UPDATE, { score: Math.floor(this.score) });
+        Session.GetInstance().SendEvent(C2S_PACKET_TYPE_SCORE_UPDATE, { score: Math.floor(this.score), currentStage: this.currentStage });
       }
 
       this.serverScoreUpdateTime -= deltaTime;
