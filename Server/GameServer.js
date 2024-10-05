@@ -60,16 +60,19 @@ export class GameServer {
     }
 
     Accept(socketIO) {
+
         // connection이라는 이벤트가 발생할 때까지 대기한다.
         // 서버에 접속하는 모든 유저들을 대상으로 하는 이벤트를 탐지한다.
         socketIO.on('connection', (socket) => {
+            const userUUID = this.userID;//uuidV4();                     
+            this.AddUser(new User(userUUID, socket));
+
+            this.userID++;
+
             // Recv Event 등록
             socket.on("event", (data) => this.Recv(socketIO, socket, data));
             // Disconnect Event 등록
-            socket.on("disconnect", (socket) => { this.Disconnect(socket, userUUID) });
-
-            const userUUID = ++this.userID;//uuidV4();
-            this.AddUser(new User(userUUID, socket));
+            socket.on("disconnect", (socket) => { this.Disconnect(socket, userUUID) });            
         })
     }
 
