@@ -45,7 +45,7 @@ class Session {
                 case S2C_PACKET_TYPE_GAME_START:
                     Game.GetInstance().SetRankScores(data.data);
                     break;
-                case S2C_PACKET_TYPE_RANK_SCORE_UPDATE:
+                case S2C_PACKET_TYPE_RANK_SCORE_UPDATE:                    
                     Game.GetInstance().SetRankScore(data.data);
                     break;
                 case S2C_PACKET_TYPE_MOVE_STAGE:                    
@@ -54,9 +54,7 @@ class Session {
                 case S2C_PACKET_TYPE_USER_DISCONNECT:
                     Game.GetInstance().OtherUserDisconnect(data.data);
                     break;
-            }
-
-            //console.log(data);
+            }            
         });
     }
 
