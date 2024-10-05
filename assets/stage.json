@@ -2,11 +2,15 @@
   "name": "stage",
   "version": "1.0.0",
   "data": [
-    { "id":  1000, "goalScore": 10, "scoreMultiple": 1 },
-    { "id":  1001, "goalScore": 200, "scoreMultiple": 1.1 },
-    { "id":  1002, "goalScore": 300, "scoreMultiple": 1.2 },
-    { "id":  1003, "goalScore": 400, "scoreMultiple": 1.3 },
-    { "id":  1004, "goalScore": 500, "scoreMultiple": 1.4 },
-    { "id":  1005, "goalScore": 600, "scoreMultiple": 1.5 }    
+    { "currentStageId":  1, "goalScore": 10, "scoreMultiple": 1 , "nextStageId":2 },
+    { "currentStageId":  2, "goalScore": 20, "scoreMultiple": 1.1, "nextStageId":3 },
+    { "currentStageId":  3, "goalScore": 30, "scoreMultiple": 1.2, "nextStageId":4 },
+    { "currentStageId":  4, "goalScore": 40, "scoreMultiple": 1.3, "nextStageId":5 },
+    { "currentStageId":  5, "goalScore": 50, "scoreMultiple": 1.4, "nextStageId":6 },
+    { "currentStageId":  6, "goalScore": 60, "scoreMultiple": 1.5, "nextStageId":7 },    
+    { "currentStageId":  7, "goalScore": 70, "scoreMultiple": 1.6, "nextStageId":8 },   
+    { "currentStageId":  8, "goalScore": 80, "scoreMultiple": 1.7, "nextStageId":9 },    
+    { "currentStageId":  9, "goalScore": 90, "scoreMultiple": 1.8, "nextStageId":10 },    
+    { "currentStageId":  10, "goalScore": 100, "scoreMultiple": 1.9, "nextStageId":-1 }    
   ]
 }
