@@ -8,8 +8,8 @@ export class Stage {
         this.stages[uuid] = [];
     }
 
-    SetStage(uuid, id, scoreMultiple, timestamp) {
-        return this.stages[uuid].push({ id, scoreMultiple, timestamp });
+    SetStage(uuid, currentStageId, scoreMultiple, nextStageId, timestamp) {
+        return this.stages[uuid].push({ currentStageId, scoreMultiple, nextStageId, timestamp });
     }
 
     GetStage(uuid) {
