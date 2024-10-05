@@ -3,6 +3,7 @@ class User {
         this.userUUID = userUUID;
         this.socket = socket;
         this.score = 0;
+        this.currentStage = 0;
     }
 }
 
