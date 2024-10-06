@@ -2,7 +2,7 @@ import {
     MAIN_GAME_CANVAS_WIDTH, MAIN_GAME_CANVAS_HEIGHT,
     RANK_SCORE_CANVAS_WIDTH, RANK_SCORE_CANVAS_HEIGHT,
     GROUND_SPEED, CACTUS_MINUS_SCORE,
-    OBJECT_TYPE_FIRE, OBJECT_TYPE_PLAYER, OBJECT_TYPE_POKET_BALL,
+    OBJECT_TYPE_FIRE, OBJECT_TYPE_PLAYER, ITEM_PLUS_SCORE,
     JOB_TYPE_CREATE_OBJECT_FIRE
 } from "./Constant.js";
 
@@ -179,11 +179,15 @@ class Game {
         this.fireController.Update(gameSpeed, deltaTime);
 
         if (this.cactiController.collideWithSingle(this.player)) {            
-            this.score.SetScoreMinus(CACTUS_MINUS_SCORE);            
+            //this.score.SetScoreMinus(CACTUS_MINUS_SCORE);            
         }
 
         this.cactiController.update(gameSpeed, deltaTime); 
-        
+
+        if(this.itemController.collideWith(this.player)){
+            //this.score.SetScorePlus(ITEM_PLUS_SCORE);
+        }
+
         this.itemController.update(gameSpeed, deltaTime);
 
         this.score.update(deltaTime);
@@ -201,11 +205,12 @@ class Game {
         this.DrawRankingScore();
     }
 
-    SetGameInit(data) {        
-        this.score.SetScoreInfo(data.currentStageId, data.nextStageId, data.goalScore, data.scoreMultiple);
+    SetGameInit(data) {                  
+        this.userID = data.uuid;             
+        this.score.SetScoreInfo(data.currentStage.currentStageId, data.currentStage.nextStageId, data.currentStage.goalScore, data.currentStage.scoreMultiple);
     }
 
-    SetStageUpdate(data) {        
+    SetStageUpdate(data) {             
         this.score.SetScoreInfo(data.currentStageId, data.nextStageId, data.goalScore, data.scoreMultiple);
 
         this.score.stageChange = true;
@@ -215,11 +220,16 @@ class Game {
         this.rankings = [];
 
         for (let i = 0; i < rankDatas.length; i++) {
+            if(rankDatas[i][0].userUUID === this.userID)
+            {
+                this.score.score = rankDatas[i][0].score;                
+            }
+
             this.rankings.push({
                 userID: rankDatas[i][0].userUUID,
                 score: rankDatas[i][0].score,
                 currentStage: rankDatas[i][0].currentStage
-            });
+            });            
         }
     }
 
