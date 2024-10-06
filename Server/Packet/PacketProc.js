@@ -1,4 +1,10 @@
-import { S2C_PACKET_TYPE_GAME_INIT, S2C_PACKET_TYPE_GAME_START, S2C_PACKET_TYPE_MOVE_STAGE, S2C_PACKET_TYPE_RANK_SCORE_UPDATE } from "../Constant.js"
+import {
+    S2C_PACKET_TYPE_GAME_INIT,
+    S2C_PACKET_TYPE_GAME_START,
+    S2C_PACKET_TYPE_MOVE_STAGE,
+    S2C_PACKET_TYPE_RANK_SCORE_UPDATE,
+    S2C_PACKET_TYPE_ERROR
+} from "../Constant.js"
 import { getGameAssets } from "../Contents/assets.js"
 
 export const GameInit = (uuid, payload, Stage, users) => {
@@ -30,9 +36,11 @@ export const GameInit = (uuid, payload, Stage, users) => {
 export const GameStart = (uuid, payload, Stage, users) => {
     let scoreArray = users.map((user) => {
         const score = [];
-        score.push({ userUUID: user.userUUID,
-             score: user.score,
-              currentStage: user.currentStage });
+        score.push({
+            userUUID: user.userUUID,
+            score: user.score,
+            currentStage: user.currentStage
+        });
         return score;
     });
 
@@ -59,30 +67,47 @@ export const MoveStage = (uuid, payload, Stage, users) => {
     }
 
     const serverTime = Date.now(); // 현재 서버 시간
-    const elapsedTime = (serverTime - currentStage.timestamp) / 1000;
+    const elapsedTime = Math.floor((serverTime - currentStage.timestamp) / 1000);
 
-    const { stages } = getGameAssets();
-    let nextStage = stages.data.find(stage => stage.currentStageId === payload.nextStage);
-    if (!nextStage) {
-        console.log("다음 스테이지를 찾을 수 없습니다.");
-    }
+    let User = users.find(user => user.userUUID == uuid);
+    if (User) {
+        const totalScore = User.verifyScore + (elapsedTime * currentStage.scoreMultiple);
+        User.verifyScore = totalScore;
 
-    users.forEach(user => {
-        if (user.userUUID === uuid) {
-            user.currentStage = nextStage.currentStageId;
+        if (Math.abs(totalScore - User.score) > currentStage.scoreMultiple * 5) {
+            return {
+                isBroadCast: false, exceptMe: false,
+                packetType: S2C_PACKET_TYPE_ERROR,
+                data: null
+            };
         }
-    });
 
-    Stage.SetStage(uuid, nextStage.currentStageId, nextStage.scoreMultiple, nextStage.nextStageId, serverTime);
+        User.verifyScore = User.score;
 
-    return {
-        isBroadCast: false, exceptMe: false,
-        packetType: S2C_PACKET_TYPE_MOVE_STAGE,
-        data: nextStage
-    };
+        const { stages } = getGameAssets();
+        let nextStage = stages.data.find(stage => stage.currentStageId === payload.nextStage);
+        if (!nextStage) {
+            console.log("다음 스테이지를 찾을 수 없습니다.");
+        }
+
+        users.forEach(user => {
+            if (user.userUUID === uuid) {
+                user.currentStage = nextStage.currentStageId;
+                user.scoreMultiple = nextStage.scoreMultiple;
+            }
+        });
+
+        Stage.SetStage(uuid, nextStage.currentStageId, nextStage.scoreMultiple, nextStage.nextStageId, serverTime);
+
+        return {
+            isBroadCast: false, exceptMe: false,
+            packetType: S2C_PACKET_TYPE_MOVE_STAGE,
+            data: nextStage
+        };
+    }
 }
 
-export const ScoreUpdate = (uuid, payload, Stage, users) => {    
+export const ScoreUpdate = (uuid, payload, Stage, users) => {
     users.forEach(user => {
         if (user.userUUID === uuid) {
             user.score = payload.score;
@@ -90,21 +115,25 @@ export const ScoreUpdate = (uuid, payload, Stage, users) => {
     });
 
     let currentStages = Stage.GetStage(uuid);
-    if (!currentStages.length) {
-        return { status: "실패", message: "[MoveStage] 스테이지를 찾을 수 없습니다." };
+    if (currentStages) {
+        if (!currentStages.length) {
+            return { status: "실패", message: "[MoveStage] 스테이지를 찾을 수 없습니다." };
+        }
+
+        currentStages.sort((a, b) => a.currentStageId - b.currentStageId);
+
+        const currentStage = currentStages[currentStages.length - 1];
+        if (currentStage) {
+            if (currentStage.currentStageId !== payload.currentStage) {
+                return { status: "실패", message: "현재 스테이지가 맞지 않습니다." };
+            }
+        }
+
+        return {
+            isBroadCast: true,
+            exceptMe: false,
+            packetType: S2C_PACKET_TYPE_RANK_SCORE_UPDATE,
+            data: { userUUID: uuid, score: payload.score, currentStage: currentStage.currentStageId }
+        };
     }
-
-    currentStages.sort((a, b) => a.currentStageId - b.currentStageId);
-    const currentStage = currentStages[currentStages.length - 1];
-
-    if (currentStage.currentStageId !== payload.currentStage) {
-        return { status: "실패", message: "현재 스테이지가 맞지 않습니다." };
-    }
-
-    return {
-        isBroadCast: true,
-        exceptMe: false,
-        packetType: S2C_PACKET_TYPE_RANK_SCORE_UPDATE,
-        data: { userUUID: uuid, score: payload.score, currentStage: currentStage.currentStageId }
-    };
 }
