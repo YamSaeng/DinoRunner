@@ -3,13 +3,15 @@ import {
     S2C_PACKET_TYPE_GAME_START,
     S2C_PACKET_TYPE_MOVE_STAGE,
     S2C_PACKET_TYPE_RANK_SCORE_UPDATE,
-    S2C_PACKET_TYPE_ERROR
+    S2C_PACKET_TYPE_ERROR,
+    ITEM_PLUS_SCORE,
+    CACTUS_MINUS_SCORE
 } from "../Constant.js"
 import { getGameAssets } from "../Contents/assets.js"
 
 export const GameInit = (uuid, payload, Stage, users) => {
     const { stages } = getGameAssets();
-        
+
     Stage.ClearStage(uuid);
 
     const currentStage = {
@@ -144,4 +146,24 @@ export const ScoreUpdate = (uuid, payload, Stage, users) => {
             data: { userUUID: uuid, score: payload.score, currentStage: currentStage.currentStageId }
         };
     }
+}
+
+export const GetItem = (uuid, payload, Stage, users) => {
+    users.forEach(user => {
+        if (user.userUUID === uuid) {            
+            user.SetScore(ITEM_PLUS_SCORE);
+        }
+    });
+
+    return null;
+}
+
+export const CollideCactus = (uuid, payload, Stage, users) => {
+    users.forEach(user => {
+        if (user.userUUID === uuid) {
+            user.SetScore(-CACTUS_MINUS_SCORE);            
+        }
+    });
+    
+    return null;
 }
