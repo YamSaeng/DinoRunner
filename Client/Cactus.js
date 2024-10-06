@@ -11,6 +11,8 @@ class Cactus {
     this.width = width;
     this.height = height;
     this.image = image;
+
+    this.isCollide = false;
   }
 
   update(speed, gameSpeed, deltaTime, scaleRatio) {
