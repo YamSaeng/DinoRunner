@@ -3,7 +3,8 @@ import { FIRE_SPEED, FIRE_ANIMATION_TIME, FIRE_ANIMATION_START_SPRITE_INDEX, OBJ
 class Fire {
     sprites = [];
 
-    constructor(ctx, scaleRatio) {
+    constructor(id, ctx, scaleRatio) {
+        this.id = id;
         this.ctx = ctx;
         this.scaleRatio = scaleRatio;
         this.width = 100 * this.scaleRatio;
@@ -16,6 +17,8 @@ class Fire {
 
         this.animationTime = FIRE_ANIMATION_TIME;
         this.animationIndex = FIRE_ANIMATION_START_SPRITE_INDEX;
+
+        this.isCollide = false;
 
         this.SpriteLoad();
     }
@@ -58,6 +61,18 @@ class Fire {
 
     draw() {
         this.ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    }
+
+    collideWith(sprite) {
+        const adjustBy = 1.4;
+
+        // 충돌
+        return (
+            this.x < sprite.x + sprite.width / adjustBy &&
+            this.x + this.width / adjustBy > sprite.x &&
+            this.y < sprite.y + sprite.height / adjustBy &&
+            this.y + this.height / adjustBy > sprite.y
+        );
     }
 }
 
