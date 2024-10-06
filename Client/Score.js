@@ -1,4 +1,4 @@
-import { C2S_PACKET_TYPE_MOVE_STAGE, C2S_PACKET_TYPE_SCORE_UPDATE, C2S_SCORE_SEND_TIME } from "./Constant.js";
+import { C2S_PACKET_TYPE_MOVE_STAGE, C2S_SCORE_SEND_TIME } from "./Constant.js";
 import Session from "./Network/Session.js";
 
 class Score {
@@ -21,16 +21,17 @@ class Score {
     this.score = 0;
   }
 
-  update(deltaTime) {        
+  update(deltaTime) {
     if (this.start == true) {
 
       if (Math.floor(this.score) >= this.goalScore && this.stageChange) {
         this.stageChange = false;
-        Session.GetInstance().SendEvent(C2S_PACKET_TYPE_MOVE_STAGE, { score : this.score, currentStage: this.currentStage, nextStage: this.nextStage });
+        Session.GetInstance().SendEvent(C2S_PACKET_TYPE_MOVE_STAGE, { score: this.score, currentStage: this.currentStage, nextStage: this.nextStage });
       }
-      
-      if (this.serverScoreUpdateTime < 0 && this.stageChange == true) {        
-        this.score += this.scoreMultiple;               
+
+      if (this.serverScoreUpdateTime < 0 && this.stageChange == true) {
+        this.score += this.scoreMultiple;        
+
         this.serverScoreUpdateTime = C2S_SCORE_SEND_TIME;
       }
 
@@ -40,7 +41,7 @@ class Score {
     }
   }
 
-  SetScoreInfo(currentStage, nextStage, goalScore, scoreMultiple) {       
+  SetScoreInfo(currentStage, nextStage, goalScore, scoreMultiple) {
     this.currentStage = currentStage;
     this.nextStage = nextStage;
     this.goalScore = goalScore;
@@ -75,11 +76,11 @@ class Score {
     }
   }
 
-  SetScorePlus(score){
+  SetScorePlus(score) {
     this.score += score;
   }
 
-  draw() {    
+  draw() {
     const highScore = Number(localStorage.getItem(this.HIGH_SCORE_KEY));
     const y = 25 * this.scaleRatio;
 
