@@ -40,6 +40,9 @@ export const FIRE_ATTACK_TIMER = 200;
 // 선인장
 export const CACTUS_MINUS_SCORE = 5;
 
+// 아이템
+export const ITEM_PLUS_SCORE = 10;
+
 export const OBJECT_TYPE_PLAYER = 101;
 export const OBJECT_TYPE_FIRE = 102;
 export const OBJECT_TYPE_POKET_BALL = 103;
@@ -60,6 +63,8 @@ export const S2C_PACKET_TYPE_GAME_INIT = 103;
 export const S2C_PACKET_TYPE_GAME_START = 104;
 export const S2C_PACKET_TYPE_RANK_SCORE_UPDATE = 105;
 export const S2C_PACKET_TYPE_MOVE_STAGE = 106;
+
+export const C2S_PACKET_TYPE_ITEM = 107;
 
 export const S2C_PACKET_TYPE_USER_DISCONNECT = 1001;
 
