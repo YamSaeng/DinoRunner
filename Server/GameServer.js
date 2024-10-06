@@ -24,7 +24,9 @@ export class GameServer {
         this.stage = new Stage();
         this.userID = 1;
 
-        this.userScoreUpdateTime = USER_SCORE_UPDATE_TIME;                
+        this.userScoreUpdateTime = USER_SCORE_UPDATE_TIME;
+
+        this.HighScore = { userId: 0, score: 0 };
     }
 
     ServerStart() {
@@ -95,16 +97,18 @@ export class GameServer {
         }
 
         const response = packetType(data.userId, data.payload, this.stage, this.users);
-        if (response.isBroadCast == true) {
-            if (response.exceptMe == true) {
-                this.BroadCastExceptMe(data.userId, { packetType: response.packetType, data: response.data });
+        if (response !== null) {
+            if (response.isBroadCast === true) {
+                if (response.exceptMe === true) {
+                    this.BroadCastExceptMe(data.userId, { packetType: response.packetType, data: response.data });
+                }
+                else {
+                    this.BroadCast({ packetType: response.packetType, data: response.data });
+                }
             }
             else {
-                this.BroadCast({ packetType: response.packetType, data: response.data });
+                socket.emit("response", { packetType: response.packetType, data: response.data });
             }
-        }
-        else {
-            socket.emit("response", { packetType: response.packetType, data: response.data });
         }
     }
 
@@ -143,7 +147,7 @@ export class GameServer {
             this.userScoreUpdateTime = USER_SCORE_UPDATE_TIME;
 
             if (this.users.length > 0) {
-                this.users.forEach(user => user.Update());
+                this.users.forEach(user => user.Update());                
 
                 // 업데이트한 점수를 접속 중인 유저들에게 전달                        
                 let scoreArray = this.users.map((user) => {
@@ -154,7 +158,7 @@ export class GameServer {
                         currentStage: user.currentStage
                     });
                     return score;
-                });
+                });                
 
                 this.BroadCast({ packetType: S2C_PACKET_TYPE_RANK_SCORE_UPDATE, data: scoreArray });
             }
