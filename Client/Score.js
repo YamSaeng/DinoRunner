@@ -17,28 +17,33 @@ class Score {
 
     this.currentStage = 0;
     this.nextStage = 0;
+    this.second = 0;
   }
 
   update(deltaTime) {
     if (this.start == true) {
-      this.score += deltaTime * 0.001 * this.scoreMultiple;
 
-      if (Math.floor(this.score) === this.goalScore && this.stageChange) {
+      if (Math.floor(this.score) >= this.goalScore && this.stageChange) {
         this.stageChange = false;
         Session.GetInstance().SendEvent(C2S_PACKET_TYPE_MOVE_STAGE, { currentStage: this.currentStage, nextStage: this.nextStage });
       }
 
-      if (this.serverScoreUpdateTime < 0) {
+      if (this.serverScoreUpdateTime < 0 && this.stageChange == true) {
+        this.second += 1;
+        this.score += this.scoreMultiple;        
         this.serverScoreUpdateTime = C2S_SCORE_SEND_TIME;
 
-        Session.GetInstance().SendEvent(C2S_PACKET_TYPE_SCORE_UPDATE, { score: Math.floor(this.score), currentStage: this.currentStage });
+        Session.GetInstance().SendEvent(C2S_PACKET_TYPE_SCORE_UPDATE, { score: this.score, currentStage: this.currentStage });
       }
 
-      this.serverScoreUpdateTime -= deltaTime;
+      if (this.stageChange == true) {
+        this.serverScoreUpdateTime -= deltaTime;
+      }
     }
   }
 
   SetScoreInfo(currentStage, nextStage, goalScore, scoreMultiple) {
+    this.second = 0;
     this.currentStage = currentStage;
     this.nextStage = nextStage;
     this.goalScore = goalScore;
