@@ -4,7 +4,7 @@ import { Server as SocketIO } from "socket.io";
 import { v4 as uuidV4 } from "uuid";
 
 import { loadGameAssets } from "./Contents/assets.js";
-import { PORT } from "./Constant.js";
+import { PORT, USER_SCORE_UPDATE_TIME } from "./Constant.js";
 import { CLIENT_VERSION, S2C_PACKET_TYPE_USER_DISCONNECT } from "../Server/Constant.js";
 import packetTypeMaapings from "./PacketType.js";
 import { Stage } from "./Contents/Stage.js";
@@ -60,10 +60,10 @@ export class GameServer {
     }
 
     Accept(socketIO) {
-
         // connection이라는 이벤트가 발생할 때까지 대기한다.
         // 서버에 접속하는 모든 유저들을 대상으로 하는 이벤트를 탐지한다.
         socketIO.on('connection', (socket) => {
+            console.log("5");
             const userUUID = this.userID;//uuidV4();                     
             this.AddUser(new User(userUUID, socket));
 
@@ -72,7 +72,7 @@ export class GameServer {
             // Recv Event 등록
             socket.on("event", (data) => this.Recv(socketIO, socket, data));
             // Disconnect Event 등록
-            socket.on("disconnect", (socket) => { this.Disconnect(socket, userUUID) });            
+            socket.on("disconnect", (socket) => { this.Disconnect(socket, userUUID) });
         })
     }
 
@@ -107,7 +107,7 @@ export class GameServer {
     Disconnect(socket, uuid) {
         console.log(`소켓 연결이 해제 되었습니다. ${uuid}`);
 
-        const response = {packetType : S2C_PACKET_TYPE_USER_DISCONNECT, data: uuid};
+        const response = { packetType: S2C_PACKET_TYPE_USER_DISCONNECT, data: uuid };
         this.BroadCastExceptMe(uuid, response);
         this.RemoveUser(uuid);
     }
@@ -128,6 +128,33 @@ export class GameServer {
             return this.users.splice(index, 1)[0];
         }
     }
+
+    // Update() {
+    //     let previousTime = Date.now();
+    //     let currentTime = 0;
+    //     let deltaTime = 0;
+
+    //     let userScoreUpdateTime = USER_SCORE_UPDATE_TIME;
+
+    //     while (1) {
+    //         currentTime = Date.now();
+    //         deltaTime = currentTime - previousTime;
+
+    //         if (deltaTime >= 20) {
+    //             previousTime = currentTime;
+
+    //             userScoreUpdateTime -= deltaTime;
+
+    //             if (userScoreUpdateTime < 0) {
+    //                 userScoreUpdateTime = USER_SCORE_UPDATE_TIME;                    
+    //                 if (this.users.length > 0) {                 
+
+    //                     this.users.forEach(user => user.update());
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     GetUser() {
         return this.users;
