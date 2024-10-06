@@ -8,7 +8,6 @@ class CactiController {
     nextCactusInterval = null;
     cactis = [];
 
-
     constructor(ctx, cactiImages, scaleRatio, speed) {
         this.cactusID = 1;
         this.ctx = ctx;
@@ -61,6 +60,13 @@ class CactiController {
 
         this.nextCactusInterval -= deltaTime;
 
+        this.cactis.forEach((cactus)=>{
+            if(cactus.isCollide == true)
+            {
+                this.cactis = this.cactis.filter(collideCactus => collideCactus.id !== cactus.id);
+            }
+        })
+
         this.cactis.forEach((cactus) => {
             cactus.update(this.speed, gameSpeed, deltaTime, this.scaleRatio);
         })
@@ -73,13 +79,13 @@ class CactiController {
         this.cactis.forEach((cactus) => cactus.draw());
     }
 
-    collideWith(sprite) {
+    collideWithSingle(sprite) {
         let isCollider = false;
 
         this.cactis.forEach(cactus => {
             if(cactus.collideWith(sprite))
             {                
-                this.cactis = this.cactis.filter(collideCactus => cactus.id !== collideCactus.id);                
+                cactus.isCollide = true;                
                 isCollider = true;
             }
         });        
