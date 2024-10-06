@@ -8,10 +8,19 @@ class User {
         this.scoreMultiple = 1;
     }
 
-    update() {
+    Update() {
         this.score += this.scoreMultiple;
 
         console.log(`UserID : ${this.userUUID} Score : ${this.score}`);
+    }
+
+    SetScore(score)
+    {
+        this.score += score;
+
+        if (this.score < 0) {
+            this.score = 0;
+        }
     }
 }
 
