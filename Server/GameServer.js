@@ -5,7 +5,11 @@ import { v4 as uuidV4 } from "uuid";
 
 import { loadGameAssets } from "./Contents/assets.js";
 import { PORT, USER_SCORE_UPDATE_TIME } from "./Constant.js";
-import { CLIENT_VERSION, S2C_PACKET_TYPE_USER_DISCONNECT } from "../Server/Constant.js";
+import {
+    CLIENT_VERSION,
+    S2C_PACKET_TYPE_USER_DISCONNECT,
+    S2C_PACKET_TYPE_RANK_SCORE_UPDATE
+} from "../Server/Constant.js";
 import packetTypeMaapings from "./PacketType.js";
 import { Stage } from "./Contents/Stage.js";
 
@@ -19,6 +23,8 @@ export class GameServer {
         this.users = [];
         this.stage = new Stage();
         this.userID = 1;
+
+        this.userScoreUpdateTime = USER_SCORE_UPDATE_TIME;                
     }
 
     ServerStart() {
@@ -129,32 +135,31 @@ export class GameServer {
         }
     }
 
-    // Update() {
-    //     let previousTime = Date.now();
-    //     let currentTime = 0;
-    //     let deltaTime = 0;
+    Update() {
+        this.userScoreUpdateTime -= 15;
 
-    //     let userScoreUpdateTime = USER_SCORE_UPDATE_TIME;
+        // 1초마다 서버에서 Score 계산
+        if (this.userScoreUpdateTime < 0) {
+            this.userScoreUpdateTime = USER_SCORE_UPDATE_TIME;
 
-    //     while (1) {
-    //         currentTime = Date.now();
-    //         deltaTime = currentTime - previousTime;
+            if (this.users.length > 0) {
+                this.users.forEach(user => user.Update());
 
-    //         if (deltaTime >= 20) {
-    //             previousTime = currentTime;
+                // 업데이트한 점수를 접속 중인 유저들에게 전달                        
+                let scoreArray = this.users.map((user) => {
+                    const score = [];
+                    score.push({
+                        userUUID: user.userUUID,
+                        score: user.score,
+                        currentStage: user.currentStage
+                    });
+                    return score;
+                });
 
-    //             userScoreUpdateTime -= deltaTime;
-
-    //             if (userScoreUpdateTime < 0) {
-    //                 userScoreUpdateTime = USER_SCORE_UPDATE_TIME;                    
-    //                 if (this.users.length > 0) {                 
-
-    //                     this.users.forEach(user => user.update());
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+                this.BroadCast({ packetType: S2C_PACKET_TYPE_RANK_SCORE_UPDATE, data: scoreArray });
+            }
+        }
+    }
 
     GetUser() {
         return this.users;
