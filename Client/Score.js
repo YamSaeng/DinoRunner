@@ -78,6 +78,10 @@ class Score {
     }
   }
 
+  SetScorePlus(score){
+    this.score += score;
+  }
+
   draw() {
     const highScore = Number(localStorage.getItem(this.HIGH_SCORE_KEY));
     const y = 25 * this.scaleRatio;
