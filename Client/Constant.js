@@ -37,12 +37,6 @@ export const FIRE_ANIMATION_START_SPRITE_INDEX = 2;
 export const FIRE_COUNT = 5;
 export const FIRE_ATTACK_TIMER = 200;
 
-// 선인장
-export const CACTUS_MINUS_SCORE = 5;
-
-// 아이템
-export const ITEM_PLUS_SCORE = 10;
-
 export const OBJECT_TYPE_PLAYER = 101;
 export const OBJECT_TYPE_FIRE = 102;
 export const OBJECT_TYPE_POKET_BALL = 103;
