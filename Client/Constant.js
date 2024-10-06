@@ -47,7 +47,7 @@ export const OBJECT_TYPE_CACTUS = 104;
 
 export const JOB_TYPE_CREATE_OBJECT_FIRE = 1001;
 
-export const C2S_SCORE_SEND_TIME = 500;
+export const C2S_SCORE_SEND_TIME = 1000;
 
 export const C2S_PACKET_TYPE_GAME_INIT = 10;
 export const C2S_PACKET_TYPE_GAME_START = 11;
