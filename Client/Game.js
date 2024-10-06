@@ -1,9 +1,11 @@
 import {
     MAIN_GAME_CANVAS_WIDTH, MAIN_GAME_CANVAS_HEIGHT,
     RANK_SCORE_CANVAS_WIDTH, RANK_SCORE_CANVAS_HEIGHT,
-    GROUND_SPEED, CACTUS_MINUS_SCORE,
-    OBJECT_TYPE_FIRE, OBJECT_TYPE_PLAYER, ITEM_PLUS_SCORE,
-    JOB_TYPE_CREATE_OBJECT_FIRE
+    GROUND_SPEED, 
+    OBJECT_TYPE_FIRE, OBJECT_TYPE_PLAYER,
+    JOB_TYPE_CREATE_OBJECT_FIRE,
+    C2S_PACKET_TYPE_GET_ITEM,
+    C2S_PACKET_TYPE_COLLIDE_CACTUS
 } from "./Constant.js";
 
 import Player from "./Player.js";
@@ -15,6 +17,7 @@ import FireController from "./FireController.js";
 
 import Ground from "./Ground.js";
 import Score from "./Score.js";
+import Session from "./Network/Session.js";
 
 class Game {
     constructor() {
@@ -178,14 +181,14 @@ class Game {
         this.fireController.CollideWithMultiple(this.cactiController.cactis);        
         this.fireController.Update(gameSpeed, deltaTime);
 
-        if (this.cactiController.collideWithSingle(this.player)) {            
-            //this.score.SetScoreMinus(CACTUS_MINUS_SCORE);            
+        if (this.cactiController.collideWithSingle(this.player)) {     
+            Session.GetInstance().SendEvent(C2S_PACKET_TYPE_COLLIDE_CACTUS);                   
         }
-
+        
         this.cactiController.update(gameSpeed, deltaTime); 
 
         if(this.itemController.collideWith(this.player)){
-            //this.score.SetScorePlus(ITEM_PLUS_SCORE);
+            Session.GetInstance().SendEvent(C2S_PACKET_TYPE_GET_ITEM);            
         }
 
         this.itemController.update(gameSpeed, deltaTime);
@@ -217,8 +220,7 @@ class Game {
     }
 
     SetRankScores(rankDatas) {
-        this.rankings = [];
-
+        this.rankings = [];        
         for (let i = 0; i < rankDatas.length; i++) {
             if(rankDatas[i][0].userUUID === this.userID)
             {
