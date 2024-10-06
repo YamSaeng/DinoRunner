@@ -18,22 +18,20 @@ class Score {
     this.currentStage = 0;
     this.nextStage = 0;
     this.second = 0;
+    this.score = 0;
   }
 
-  update(deltaTime) {
+  update(deltaTime) {        
     if (this.start == true) {
 
       if (Math.floor(this.score) >= this.goalScore && this.stageChange) {
         this.stageChange = false;
-        Session.GetInstance().SendEvent(C2S_PACKET_TYPE_MOVE_STAGE, { currentStage: this.currentStage, nextStage: this.nextStage });
+        Session.GetInstance().SendEvent(C2S_PACKET_TYPE_MOVE_STAGE, { score : this.score, currentStage: this.currentStage, nextStage: this.nextStage });
       }
-
-      if (this.serverScoreUpdateTime < 0 && this.stageChange == true) {
-        this.second += 1;
-        this.score += this.scoreMultiple;        
+      
+      if (this.serverScoreUpdateTime < 0 && this.stageChange == true) {        
+        this.score += this.scoreMultiple;               
         this.serverScoreUpdateTime = C2S_SCORE_SEND_TIME;
-
-        Session.GetInstance().SendEvent(C2S_PACKET_TYPE_SCORE_UPDATE, { score: this.score, currentStage: this.currentStage });
       }
 
       if (this.stageChange == true) {
@@ -42,8 +40,7 @@ class Score {
     }
   }
 
-  SetScoreInfo(currentStage, nextStage, goalScore, scoreMultiple) {
-    this.second = 0;
+  SetScoreInfo(currentStage, nextStage, goalScore, scoreMultiple) {       
     this.currentStage = currentStage;
     this.nextStage = nextStage;
     this.goalScore = goalScore;
@@ -82,7 +79,7 @@ class Score {
     this.score += score;
   }
 
-  draw() {
+  draw() {    
     const highScore = Number(localStorage.getItem(this.HIGH_SCORE_KEY));
     const y = 25 * this.scaleRatio;
 
