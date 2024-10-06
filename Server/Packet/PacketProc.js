@@ -9,7 +9,7 @@ import { getGameAssets } from "../Contents/assets.js"
 
 export const GameInit = (uuid, payload, Stage, users) => {
     const { stages } = getGameAssets();
-
+        
     Stage.ClearStage(uuid);
 
     const currentStage = {
@@ -28,12 +28,12 @@ export const GameInit = (uuid, payload, Stage, users) => {
     return {
         isBroadCast: false, exceptMe: false,
         packetType: S2C_PACKET_TYPE_GAME_INIT,
-        data: currentStage
+        data: { currentStage, uuid }
     }
 }
 
 // 서버에서 게임시작
-export const GameStart = (uuid, payload, Stage, users) => {
+export const GameStart = (uuid, payload, Stage, users) => { 
     let scoreArray = users.map((user) => {
         const score = [];
         score.push({
@@ -56,38 +56,46 @@ export const GameEnd = (uuid, payload, Stage, users) => {
 export const MoveStage = (uuid, payload, Stage, users) => {
     let currentStages = Stage.GetStage(uuid);
     if (!currentStages.length) {
-        return { status: "실패", message: "[MoveStage] 스테이지를 찾을 수 없습니다." };
+        return {
+            isBroadCast: false, exceptMe: false,
+            packetType: S2C_PACKET_TYPE_ERROR,
+            data: "ERROR 스테이지를 찾을 수 없습니다."
+        };
     }
 
     currentStages.sort((a, b) => a.currentStageId - b.currentStageId);
     const currentStage = currentStages[currentStages.length - 1];
 
     if (currentStage.currentStageId !== payload.currentStage) {
-        return { status: "실패", message: "현재 스테이지가 맞지 않습니다." };
+        return {
+            isBroadCast: false, exceptMe: false,
+            packetType: S2C_PACKET_TYPE_ERROR,
+            data: "ERROR 현재 스테이지가 맞지 않습니다."
+        }
     }
 
-    const serverTime = Date.now(); // 현재 서버 시간
-    const elapsedTime = Math.floor((serverTime - currentStage.timestamp) / 1000);
+    const serverTime = Date.now(); // 현재 서버 시간    
 
     let User = users.find(user => user.userUUID == uuid);
     if (User) {
-        const totalScore = User.verifyScore + (elapsedTime * currentStage.scoreMultiple);
-        User.verifyScore = totalScore;
+        console.log(`서버 점수 : ${User.score} 유저 점수 : ${payload.score}`);
 
-        if (Math.abs(totalScore - User.score) > currentStage.scoreMultiple * 5) {
+        if (Math.abs(User.score - payload.score) > 10) {
             return {
                 isBroadCast: false, exceptMe: false,
                 packetType: S2C_PACKET_TYPE_ERROR,
-                data: null
-            };
+                data: "ERROR 점수 에러"
+            }
         }
-
-        User.verifyScore = User.score;
 
         const { stages } = getGameAssets();
         let nextStage = stages.data.find(stage => stage.currentStageId === payload.nextStage);
         if (!nextStage) {
-            console.log("다음 스테이지를 찾을 수 없습니다.");
+            return {
+                isBroadCast: false, exceptMe: false,
+                packetType: S2C_PACKET_TYPE_ERROR,
+                data: "ERROR 다음 스테이지를 찾을 수 없습니다."
+            }
         }
 
         users.forEach(user => {
