@@ -35,8 +35,7 @@ export const loadGameAssets = async () => {
         // 각각 stages, items, itemUnlocks에 저장할 수 있도록 Promise.all을 활용해준다.
         const [stages, items, itemUnlocks] = await Promise.all([
             readFileAsync('stage.json'),
-            readFileAsync('item.json'),
-            readFileAsync('item_unlock.json')
+            readFileAsync('item.json')            
         ]);
 
         gameAssets = { stages, items, itemUnlocks };
