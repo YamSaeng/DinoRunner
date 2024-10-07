@@ -3,6 +3,7 @@ import {
     S2C_PACKET_TYPE_GAME_INIT,
     S2C_PACKET_TYPE_GAME_START,
     S2C_PACKET_TYPE_MOVE_STAGE,
+    S2C_PACKET_TYPE_NEW_HIGH_SCORE,
     S2C_PACKET_TYPE_RANK_SCORE_UPDATE,
     S2C_PACKET_TYPE_USER_DISCONNECT
 } from "../Constant.js";
@@ -50,6 +51,9 @@ class Session {
                     break;
                 case S2C_PACKET_TYPE_MOVE_STAGE:                    
                     Game.GetInstance().SetStageUpdate(data.data);
+                    break;
+                case S2C_PACKET_TYPE_NEW_HIGH_SCORE:   
+                    Game.GetInstance().SetNewHighScore(data.data);                 
                     break;
                 case S2C_PACKET_TYPE_USER_DISCONNECT:
                     Game.GetInstance().OtherUserDisconnect(data.data);
