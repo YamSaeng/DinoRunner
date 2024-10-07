@@ -29,6 +29,8 @@ class Game {
         this.scoreCtx = this.scoreCanvas.getContext("2d");
         this.userID = 0;
 
+        this.HighScore = { userId: 0, score: 0 };
+
         // 관리중인 오브젝트 목록
         this.objects = [];        
     }
@@ -211,7 +213,7 @@ class Game {
     SetGameInit(data) {                  
         this.userID = data.uuid;             
         this.score.SetScoreInfo(data.currentStage.currentStageId, data.currentStage.nextStageId, data.currentStage.goalScore, data.currentStage.scoreMultiple);
-    }
+    }  
 
     SetStageUpdate(data) {             
         this.score.SetScoreInfo(data.currentStageId, data.nextStageId, data.goalScore, data.scoreMultiple);
@@ -219,11 +221,18 @@ class Game {
         this.score.stageChange = true;
     }
 
+    SetNewHighScore(data)
+    {        
+        this.HighScore.userId = data.userId;
+        this.HighScore.score = data.score;        
+    }
+
     SetRankScores(rankDatas) {
         this.rankings = [];        
+
         for (let i = 0; i < rankDatas.length; i++) {
             if(rankDatas[i][0].userUUID === this.userID)
-            {
+            {                
                 this.score.score = rankDatas[i][0].score;                
             }
 
@@ -261,7 +270,7 @@ class Game {
 
         this.scoreCtx.fillText(scorePadded, scoreX, y);
 
-        this.scoreCtx.fillText("----------------------------", scoreX, y + 20);
+        this.scoreCtx.fillText("----------------------------", scoreX, y + 20);        
 
         let rankYPosition = y + 40;
         if (this.rankings.length > 0) {
