@@ -1,4 +1,5 @@
 import { C2S_PACKET_TYPE_MOVE_STAGE, C2S_SCORE_SEND_TIME } from "./Constant.js";
+import Game from "./Game.js";
 import Session from "./Network/Session.js";
 
 class Score {
@@ -30,7 +31,7 @@ class Score {
       }
 
       if (this.serverScoreUpdateTime < 0 && this.stageChange == true) {
-        this.score += this.scoreMultiple;        
+        this.score += this.scoreMultiple;
 
         this.serverScoreUpdateTime = C2S_SCORE_SEND_TIME;
       }
@@ -58,13 +59,6 @@ class Score {
     this.score = 0;
   }
 
-  setHighScore() {
-    const highScore = Number(localStorage.getItem(this.HIGH_SCORE_KEY));
-    if (this.score > highScore) {
-      localStorage.setItem(this.HIGH_SCORE_KEY, Math.floor(this.score));
-    }
-  }
-
   getScore() {
     return this.score;
   }
@@ -81,21 +75,19 @@ class Score {
   }
 
   draw() {
-    const highScore = Number(localStorage.getItem(this.HIGH_SCORE_KEY));
     const y = 25 * this.scaleRatio;
 
     const fontSize = 20 * this.scaleRatio;
     this.ctx.font = `${fontSize}px serif`;
     this.ctx.fillStyle = '#525250';
 
-    const scoreX = this.canvas.width - 155 * this.scaleRatio;
-    const highScoreX = scoreX - 200 * this.scaleRatio;
+    const userIdX = this.canvas.width - 155 * this.scaleRatio;
+    const highScoreX = userIdX - 300;
 
     const scorePadded = Math.floor(this.score).toString().padStart(6, 0);
-    const highScorePadded = highScore.toString().padStart(6, 0);
 
-    this.ctx.fillText(`최고 점수 : ${highScorePadded}`, highScoreX, y);
-    this.ctx.fillText(`점수 : ${scorePadded}`, scoreX, y);
+    this.ctx.fillText(`내 아이디 : ${Game.GetInstance().userID}`, userIdX, y);
+    this.ctx.fillText(`[최고점수] [아이디 : ${Game.GetInstance().HighScore.userId} 점수 : ${Game.GetInstance().HighScore.score}]`, highScoreX, y);
   }
 }
 
