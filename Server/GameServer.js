@@ -4,11 +4,12 @@ import { Server as SocketIO } from "socket.io";
 import { v4 as uuidV4 } from "uuid";
 
 import { loadGameAssets } from "./Contents/assets.js";
-import { PORT, USER_SCORE_UPDATE_TIME } from "./Constant.js";
+import { PORT, RANK_SCORE_UPDATE_TIME, USER_SCORE_UPDATE_TIME } from "./Constant.js";
 import {
     CLIENT_VERSION,
     S2C_PACKET_TYPE_USER_DISCONNECT,
-    S2C_PACKET_TYPE_RANK_SCORE_UPDATE
+    S2C_PACKET_TYPE_RANK_SCORE_UPDATE,
+    S2C_PACKET_TYPE_NEW_HIGH_SCORE
 } from "../Server/Constant.js";
 import packetTypeMaapings from "./PacketType.js";
 import { Stage } from "./Contents/Stage.js";
@@ -25,6 +26,7 @@ export class GameServer {
         this.userID = 1;
 
         this.userScoreUpdateTime = USER_SCORE_UPDATE_TIME;
+        this.rankingScoreUpdateTime = RANK_SCORE_UPDATE_TIME;
 
         this.HighScore = { userId: 0, score: 0 };
     }
@@ -71,7 +73,6 @@ export class GameServer {
         // connection이라는 이벤트가 발생할 때까지 대기한다.
         // 서버에 접속하는 모든 유저들을 대상으로 하는 이벤트를 탐지한다.
         socketIO.on('connection', (socket) => {
-            console.log("5");
             const userUUID = this.userID;//uuidV4();                     
             this.AddUser(new User(userUUID, socket));
 
@@ -96,7 +97,8 @@ export class GameServer {
             return;
         }
 
-        const response = packetType(data.userId, data.payload, this.stage, this.users);
+        // 패킷을 처리하고 응답을 받아 요청한 클라에게 응답
+        const response = packetType(data.userId, data.payload, this.stage, this.users, this.HighScore);
         if (response !== null) {
             if (response.isBroadCast === true) {
                 if (response.exceptMe === true) {
@@ -122,6 +124,7 @@ export class GameServer {
         this.RemoveUser(uuid);
     }
 
+    // 유저 저장
     AddUser(newUser) {
         this.users.push(newUser);
 
@@ -132,6 +135,7 @@ export class GameServer {
         newUser.socket.emit("connection", { useruuid: newUser.userUUID });
     }
 
+    // 유저 삭제
     RemoveUser(id) {
         const index = this.users.findIndex((user) => user.userUUID == id);
         if (index !== -1) {
@@ -147,21 +151,38 @@ export class GameServer {
             this.userScoreUpdateTime = USER_SCORE_UPDATE_TIME;
 
             if (this.users.length > 0) {
-                this.users.forEach(user => user.Update());                
+                this.users.forEach(user => user.Update());
 
-                // 업데이트한 점수를 접속 중인 유저들에게 전달                        
-                let scoreArray = this.users.map((user) => {
-                    const score = [];
-                    score.push({
-                        userUUID: user.userUUID,
-                        score: user.score,
-                        currentStage: user.currentStage
-                    });
-                    return score;
-                });                
-
-                this.BroadCast({ packetType: S2C_PACKET_TYPE_RANK_SCORE_UPDATE, data: scoreArray });
+                // HighScore를 갱신
+                for (let i = 0; i < this.users.length; i++) {
+                    if (this.users[i].score > this.HighScore.score) {
+                        this.HighScore.score = this.users[i].score;
+                        this.HighScore.userId = this.users[i].userUUID;
+                        
+                        this.users[i].socket.emit("response", {
+                            packetType: S2C_PACKET_TYPE_NEW_HIGH_SCORE,
+                            data: { userId: this.HighScore.userId, score: this.HighScore.score }
+                        });
+                    }                  
+                }                
             }
+        }
+
+        this.rankingScoreUpdateTime -= 15;
+        if (this.rankingScoreUpdateTime < 0) {
+            // 업데이트한 랭킹 점수를 접속 중인 유저들에게 전달                        
+            this.rankingScoreUpdateTime = RANK_SCORE_UPDATE_TIME;
+            let scoreArray = this.users.map((user) => {
+                const score = [];
+                score.push({
+                    userUUID: user.userUUID,
+                    score: user.score,
+                    currentStage: user.currentStage
+                });
+                return score;
+            });
+
+            this.BroadCast({ packetType: S2C_PACKET_TYPE_RANK_SCORE_UPDATE, data: scoreArray });;
         }
     }
 
@@ -169,12 +190,14 @@ export class GameServer {
         return this.users;
     }
 
+    // 접속중인 유저들에게 data 전달
     BroadCast(data) {
         this.users.forEach(user => {
             user.socket.emit("response", data);
         });
     }
 
+    // uuid를 가진 유저를 제외한 접속중인 유저들에게 data 전달
     BroadCastExceptMe(uuid, data) {
         this.users.forEach(user => {
             if (user.userUUID != uuid) {
