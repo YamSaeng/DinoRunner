@@ -35,7 +35,7 @@ export const GameInit = (uuid, payload, Stage, users) => {
 }
 
 // 서버에서 게임시작
-export const GameStart = (uuid, payload, Stage, users) => { 
+export const GameStart = (uuid, payload, Stage, users) => {
     let scoreArray = users.map((user) => {
         const score = [];
         score.push({
@@ -150,7 +150,7 @@ export const ScoreUpdate = (uuid, payload, Stage, users) => {
 
 export const GetItem = (uuid, payload, Stage, users) => {
     users.forEach(user => {
-        if (user.userUUID === uuid) {            
+        if (user.userUUID === uuid) {
             user.SetScore(ITEM_PLUS_SCORE);
         }
     });
@@ -159,11 +159,23 @@ export const GetItem = (uuid, payload, Stage, users) => {
 }
 
 export const CollideCactus = (uuid, payload, Stage, users) => {
+    let currentStages = Stage.GetStage(uuid);
+    if (!currentStages.length) {
+        return {
+            isBroadCast: false, exceptMe: false,
+            packetType: S2C_PACKET_TYPE_ERROR,
+            data: "ERROR 스테이지를 찾을 수 없습니다."
+        };
+    }
+
+    currentStages.sort((a, b) => a.currentStageId - b.currentStageId);
+    const currentStage = currentStages[currentStages.length - 1];   
+
     users.forEach(user => {
         if (user.userUUID === uuid) {
-            user.SetScore(-CACTUS_MINUS_SCORE);            
+            user.SetScore(-CACTUS_MINUS_SCORE * currentStage.scoreMultiple);
         }
     });
-    
+
     return null;
 }
