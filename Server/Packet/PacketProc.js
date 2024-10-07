@@ -4,6 +4,7 @@ import {
     S2C_PACKET_TYPE_MOVE_STAGE,
     S2C_PACKET_TYPE_RANK_SCORE_UPDATE,
     S2C_PACKET_TYPE_ERROR,
+    S2C_PACKET_TYPE_NEW_HIGH_SCORE,
     ITEM_PLUS_SCORE,
     CACTUS_MINUS_SCORE
 } from "../Constant.js"
@@ -35,7 +36,7 @@ export const GameInit = (uuid, payload, Stage, users) => {
 }
 
 // 서버에서 게임시작
-export const GameStart = (uuid, payload, Stage, users) => {
+export const GameStart = (uuid, payload, Stage, users, highScore) => {
     let scoreArray = users.map((user) => {
         const score = [];
         score.push({
@@ -45,6 +46,14 @@ export const GameStart = (uuid, payload, Stage, users) => {
         });
         return score;
     });
+
+    let User = users.find(user => user.userUUID == uuid);
+    if (User) {
+        User.socket.emit("response", {
+            packetType: S2C_PACKET_TYPE_NEW_HIGH_SCORE,
+            data: { userId: highScore.userId, score: highScore.score }
+        });
+    }
 
     return { isBroadCast: true, exceptMe: false, packetType: S2C_PACKET_TYPE_GAME_START, data: scoreArray };
 }
@@ -57,12 +66,14 @@ export const GameEnd = (uuid, payload, Stage, users) => {
 // 스테이지 옮기기
 export const MoveStage = (uuid, payload, Stage, users) => {
     let currentStages = Stage.GetStage(uuid);
-    if (!currentStages.length) {
-        return {
-            isBroadCast: false, exceptMe: false,
-            packetType: S2C_PACKET_TYPE_ERROR,
-            data: "ERROR 스테이지를 찾을 수 없습니다."
-        };
+    if (currentStages) {
+        if (!currentStages.length) {
+            return {
+                isBroadCast: false, exceptMe: false,
+                packetType: S2C_PACKET_TYPE_ERROR,
+                data: "ERROR 스테이지를 찾을 수 없습니다."
+            };
+        }
     }
 
     currentStages.sort((a, b) => a.currentStageId - b.currentStageId);
@@ -160,16 +171,18 @@ export const GetItem = (uuid, payload, Stage, users) => {
 
 export const CollideCactus = (uuid, payload, Stage, users) => {
     let currentStages = Stage.GetStage(uuid);
-    if (!currentStages.length) {
-        return {
-            isBroadCast: false, exceptMe: false,
-            packetType: S2C_PACKET_TYPE_ERROR,
-            data: "ERROR 스테이지를 찾을 수 없습니다."
-        };
+    if (currentStages) {
+        if (!currentStages.length) {
+            return {
+                isBroadCast: false, exceptMe: false,
+                packetType: S2C_PACKET_TYPE_ERROR,
+                data: "ERROR 스테이지를 찾을 수 없습니다."
+            };
+        }
     }
 
     currentStages.sort((a, b) => a.currentStageId - b.currentStageId);
-    const currentStage = currentStages[currentStages.length - 1];   
+    const currentStage = currentStages[currentStages.length - 1];
 
     users.forEach(user => {
         if (user.userUUID === uuid) {
