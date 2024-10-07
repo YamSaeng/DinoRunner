@@ -9,7 +9,7 @@ class CactiController {
     cactis = [];
 
     constructor(ctx, cactiImages, scaleRatio, speed) {
-        this.cactusID = 1;
+        this.cactusID = 1; // 관리중인 선인장 구분하기 위한 ID값
         this.ctx = ctx;
         this.canvas = ctx.canvas;
         this.cactiImages = cactiImages;
@@ -60,6 +60,7 @@ class CactiController {
 
         this.nextCactusInterval -= deltaTime;
 
+        // 충돌한 선인장이 있으면 해당 선인장을 제거
         this.cactis.forEach((cactus)=>{
             if(cactus.isCollide == true)
             {
